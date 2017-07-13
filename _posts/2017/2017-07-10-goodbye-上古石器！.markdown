@@ -1,0 +1,9 @@
+---
+layout: "post"
+title: "Goodbye, 上古石器！"
+date: "2017-07-10 22:05"
+---
+在线数据可视化工具，plotly是比较大而全的。从左到右，界面分为4个区，依次是菜单、配置面板、数据表格和图表区。整个界面信息量非常大，
+所有的数据相关的操作和图形的配置均可在这一个界面内完成。
+
+![plotly's user interface](project/app/MDF Painter/resource/picture/plotly.png)
