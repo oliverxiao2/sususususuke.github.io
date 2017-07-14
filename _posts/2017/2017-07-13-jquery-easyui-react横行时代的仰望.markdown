@@ -20,6 +20,7 @@ $("#mm").data().menu.options.duration = 1000;
 
 * ui插件 jquery
 
+```
 (function(){
   $.fn.pluginName = function(option){
     var defaultSetting = {};
@@ -31,3 +32,4 @@ $("#mm").data().menu.options.duration = 1000;
     return this;
   }
 }(jQuery));
+```
