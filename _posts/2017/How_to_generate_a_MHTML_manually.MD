@@ -6,7 +6,7 @@ MIME-Version: 1.0
 Content-Type: multipart/related; boundary="{{$boundary$}}"
 
 --{{$boundary$}}
-Content-Location: file:\/\/\/c:\/report.htm
+Content-Location: file:///c:/report.htm
 Content-Type: text/html; charset="utf-8"
 
 <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word'>
@@ -38,7 +38,7 @@ div.Section1 {page:Section1;}
 </html>
 
 --{{$boundary$}}
-Content-Location: file:\/\/\/c:\/report_files/headerfooter.htm
+Content-Location: file:///c:/report_files/headerfooter.htm
 Content-Type: text/html; charset="utf-8"
 
 <html xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word">
@@ -61,6 +61,7 @@ font-family: "Segoe UI", "宋体";
 {{$images$}}
 
 --{{$boundary$}}--
+
 ```
 ## 缩进问题
 不能有缩进。
@@ -82,4 +83,71 @@ const boundary = '----=_NextPart_GREEDY.GOBLINS.SHOW.ME.THE.MONEY';
 ```
 请注意到其中的区别，并仔细地检查，确保无误。
 
+## 文件名的定义
+用绝对路径比相对路径好使多了，而且你没必要真的把文件放在你写的绝对路径上。
+另外注意定义附件时的文件夹（report => /report_files）的名称。
+- body
+```
+Content-Location: file:///c:/report.htm
+Content-Type: text/html; charset="utf-8"
+```
 
+- headerfooter
+```
+Content-Location: file:///c:/report_files/headerfooter.htm
+Content-Type: text/html; charset="utf-8"
+```
+
+- images
+```
+Content-Location: file:///c:/report_files/chart1.png
+Content-Transfer-Encoding: base64
+Content-Type: image/png
+```
+
+## 页面样式
+如果缺少css定义，页面里的html是显示不出来的。
+```
+<head>
+...
+<style>
+div.Section1 {page:Section1;}
+...
+</head>
+<body>
+<div class="Section1">
+// Core page html here
+</div>
+</body>
+```
+
+## 页眉页脚
+注意页眉页脚的css和id（定义在body的html中）就好
+
+- file:///c:/report.htm
+```
+
+<head>
+...
+<style>
+mso-first-header: url("report_files/headerfooter.htm") fh1;
+mso-header: url("report_files/headerfooter.htm") h1;
+mso-first-footer: url("report_files/headerfooter.htm") ff1;
+mso-footer: url("report_files/headerfooter.htm") f1;
+mso-title-page: {{$titlePage$}};
+...
+</head>
+<body>
+<div class="Section1">
+// Core page html here
+</div>
+</body>
+```
+
+file:///c:/report_files/headerfooter.htm
+```
+<div style="mso-element:header;" id="fh1"></div>
+<div style="mso-element:header;" id="h1"></div>
+<div style="mso-element:footer;" id="ff1"></div>
+<div style="mso-element:footer;" id="f1"></div>
+```
