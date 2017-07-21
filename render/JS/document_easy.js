@@ -470,6 +470,10 @@ $(document).ready(function(){
     }
   });
 
+  $('#menubar-edit-insert-html').click(function(){
+    document.execCommand('insertHTML', false, prompt("插入HTML", ""));
+  });
+
   $('#mm-align-left').bind('click', function(){
     document.execCommand('justifyleft')
   });

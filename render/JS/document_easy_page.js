@@ -9,6 +9,7 @@ window.pagedDoc = function(container, option){
     pagedDocStyle.innerHTML = `
     .page-shadow{box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.4);}
     .doc-page{overflow: hidden; font-family: "Segoe UI", "宋体"; font-size: 14pt;}
+    .doc-page ul, .doc-page ol{padding-left:1em;}
     .doc-page-body{border-top: 1px dashed #999; border-bottom: 1px dashed #999;}
     .doc-page-header, .doc-page-footer{background: whitesmoke;opacity: 0.5;}
     `;
@@ -324,6 +325,8 @@ body {
 font-family: "Segoe UI", "宋体";
 font-size: 12pt;
 }
+ul{padding-left:1em;}
+ol{padding-left:1em;}
 @page Section1{
 size: {{$pageSize$}};
 margin: {{$pageMargin$}};
