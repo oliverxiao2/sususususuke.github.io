@@ -73,15 +73,7 @@ for (let i=0; i<100; i++){
 /*
 
 */
-$('#mm-fontSize').click(function(e){
-  console.log(e, this);
-  const fontSize = e.target.innerText;
-  const el = $.globalStorage.range.commonAncestorContainer;
 
-  if (el){
-    el.parentNode.style.fontSize = fontSize;
-  }
-});
 
 $('#ac-file-explorer').contextmenu(function(e){
   e.preventDefault();
@@ -468,6 +460,16 @@ $(document).ready(function(){
 
   //$('#mm-document').data().menu.options.duration = 1000;
   // ********* menubar ***************************//
+  $('#mm-fontSize').click(function(e){
+    console.log(e, this);
+    const fontSize = e.target.innerText;
+    const el = $.globalStorage.range.commonAncestorContainer;
+
+    if (el){
+      el.parentNode.style.fontSize = fontSize + 'pt';
+    }
+  });
+
   $('#mm-align-left').bind('click', function(){
     document.execCommand('justifyleft')
   });
