@@ -8,7 +8,7 @@ $.globalStorage = {
     charts: [],
     activeChart: null,
     selectedCursor: null,
-    pagedDoc: new pagedDoc({container: $('#tab-document')[0]}),
+    pagedDoc: new pagedDoc($('#tab-document')[0]),
     pagedDocTemplateQuery: [],
     broadcastUpdatePagedDoc: function(){
       const content = $.globalStorage.pagedDoc.content;
@@ -22,7 +22,7 @@ $.globalStorage = {
           text: '<a onclick="$($(\'#tab-document\').children()[0]).scrollTo($(\'#'+page.pageId+'\'), 400)">第'+(i+1)+'页<a>',
         });
       }
-      for (const [i, chart] of content.MDFCharts.entries()){
+      for (const [i, chart] of content.charts.entries()){
         chartTreeData.push({
           text: '<a onclick="$($(\'#tab-document\').children()[0]).scrollTo($(\'#'+chart.id+'\'), 400)">'+(chart.title?chart.title:'插图'+(i+1))+'<a>',
         });
@@ -46,7 +46,7 @@ $.globalStorage = {
 
       // update the chart select in window of algorithm
       $('#w-document-algorithm-bind').empty();
-      for (const [i, chart] of content.MDFCharts.entries()){
+      for (const [i, chart] of content.charts.entries()){
         $('#w-document-algorithm-bind').append('<option value="' + chart.id + '">' + (chart.title?chart.title:'插图'+(i+1))+ '</option>')
       }
     },
@@ -479,6 +479,16 @@ $(document).ready(function(){
   $('#mm-align-right').bind('click', function(){
     document.execCommand('justifyright')
   });
+
+  $('#menubar-edit-insert-horizontal-rule').click(function(){
+    document.execCommand('insertHorizontalRule');
+  });
+
+  $('#menubar-edit-empty-pagedDoc').click(function(){
+    if ($.globalStorage){
+      $.globalStorage.pagedDoc.empty();
+    }
+  });
   // *********************************************** //
 
   // *************** region west ********************** //
@@ -508,6 +518,15 @@ $(document).ready(function(){
 
   $('#fm-contextmenu-remove').click(function(){
     removeTreeNode($('#file-explorer'));
+  });
+
+  $('#fm-contextmenu-load-template').click(function(){
+    const $tree = $('#file-explorer');
+    if ($tree.jquery && $tree[0]){
+      const node = $tree.tree('getSelected');
+      if (node) loadTemplate(node.text);
+    }
+
   });
   // ************************************************** //
 
@@ -563,7 +582,17 @@ $(document).ready(function(){
       const node = $tree.tree('getSelected');
       $tree.tree('remove', node.target);
     }
-  }
+  };
+
+  function loadTemplate(name){
+    if ($.globalStorage){
+      if ($.globalStorage.files[name]){
+        const template = $.globalStorage.files[name];
+        console.log(template);
+        $.globalStorage.pagedDoc.load(template);
+      }
+    }
+  };
 
   function chart_autoscale(chart){
     chart = chart?chart:$.globalStorage.activeChart;

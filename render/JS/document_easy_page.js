@@ -3,8 +3,8 @@
  */
 "use strict";
 
-window.pagedDoc = function(option){
-    this.init(option);
+window.pagedDoc = function(container, option){
+    this.init(container, option);
     const pagedDocStyle = document.createElement('style');
     pagedDocStyle.innerHTML = `
     .page-shadow{box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.4);}
@@ -15,9 +15,9 @@ window.pagedDoc = function(option){
     document.head.appendChild(pagedDocStyle);
 };
 
-pagedDoc.prototype.init = function(option){
+pagedDoc.prototype.init = function(container, option){
+    this.container = container;
     let defaultSetting = {
-        container: document.body,
         pageSize: 'A4',
         hasTitlePage: true,
         margin: '2.54cm 3.17cm 2.54cm 3.17cm',
@@ -40,7 +40,7 @@ pagedDoc.prototype.init = function(option){
         footer: '',
       },
       pageBody: [],
-      MDFCharts: [],
+      charts: [],
       files: [],
       algorithmQuery: {},
     };
@@ -52,7 +52,7 @@ pagedDoc.prototype.init = function(option){
     this.wrapper.style.width = '100%';
     this.wrapper.style.height = '100%';
     this.wrapper.style.overflowY = 'scroll';
-    this.setting.container.appendChild(this.wrapper);
+    this.container.appendChild(this.wrapper);
     this.append();
 };
 
@@ -71,7 +71,7 @@ pagedDoc.prototype.append = function(where){
       }
     });
   }
-  console.log(currentPage);
+
   newPage.id = ('page-' + performance.now()).replace('.', '--');
   newPage.className = 'page-shadow doc-page';
   newPageHeader.className = 'doc-page-header';
@@ -115,6 +115,7 @@ pagedDoc.prototype.append = function(where){
   newPageFooter.style.paddingBottom = this.setting.footerMarginBottom;
 
   this.save();
+  return {newPage, newPageHeader, newPageBody, newPageFooter};
 };
 
 pagedDoc.prototype.save = function(){
@@ -125,7 +126,7 @@ pagedDoc.prototype.save = function(){
     footer: '',
   };
   this.content.pageBody = [];
-  this.content.MDFCharts = [];
+  this.content.charts = [];
 
   const pages = $(this.wrapper).find('div[role=page]');
   let page, pageHeader, pageFooter, pageBody, pageBodyHTML, n = pages.length, totalChartIndex = 0;
@@ -149,16 +150,17 @@ pagedDoc.prototype.save = function(){
       this.content.headerFooter.footer = page.find('div[role=page-footer]:first').html();
     }
 
-    const MDFChartsOnThisPage = pageBody.find('div[name=wrapper-chart]');
-    for (let j = 0; j < MDFChartsOnThisPage.length; j++){
+    const chartsOnThisPage = pageBody.find('div[name=wrapper-chart]');
+    for (let j = 0; j < chartsOnThisPage.length; j++){
       totalChartIndex++;
-      const data = MDFChartsOnThisPage[j].parentChart.plot.data;
-      const theChartBase64 = exportAllCanvas(MDFChartsOnThisPage[j]).substr(22);
+      const data = chartsOnThisPage[j].parentChart.plot.data;
+      const theChartBase64 = exportAllCanvas(chartsOnThisPage[j]).substr(22);
       const dataObj = {
         //base64: theChartBase64,
         chartIndex: totalChartIndex,
-        id: MDFChartsOnThisPage[j].id,
+        id: chartsOnThisPage[j].id,
         data: {},
+        type: chartsOnThisPage[j].parentChart.type,
       };
 
       for (const filename in data){
@@ -182,9 +184,9 @@ pagedDoc.prototype.save = function(){
           dataObj.data[filename].dataGroup.push(theGroup);
         }
       }
-      this.content.MDFCharts.push(dataObj);
+      this.content.charts.push(dataObj);
 
-      pageBodyHTML = pageBodyHTML.replace(MDFChartsOnThisPage[j].outerHTML, '<img src="report_files\/chart'+totalChartIndex+'.png">');
+      pageBodyHTML = pageBodyHTML.replace(chartsOnThisPage[j].outerHTML, '<img role="chartObj" data-chartID=' + dataObj.id + ' src="report_files\/chart'+totalChartIndex+'.png">');
     }
 
     this.content.pageBody.push({
@@ -242,7 +244,7 @@ pagedDoc.prototype.export = function(type='word'){
     f1 = '<div style="mso-element:footer;" id="f1">' + this.content.headerFooter.footer + '</div>';
 
     let imageHTML = '';
-    const charts = this.content.MDFCharts;
+    const charts = this.content.charts;
     for (const chart of charts){
       const base64 = exportAllCanvas(document.getElementById(chart.id)).substr(22);
       imageHTML += '\n--' + boundary + '\n';
@@ -271,12 +273,39 @@ pagedDoc.prototype.export = function(type='word'){
   }
   else if (type === 'json'){
     if(saveAs){
-      saveAs(new Blob([JSON.stringify(this.content, null, '\t')], {type: "text/plain; charset=utf-8"}), 'report_template.json')
+      saveAs(new Blob([JSON.stringify({setting:this.setting, content:this.content}, null, '\t')], {type: "text/plain; charset=utf-8"}), 'report_template.json')
     }
   }
 };
 
+pagedDoc.prototype.empty = function(){
+  $(this.wrapper).empty();
+  this.append();
+  $.globalStorage.broadcastUpdatePagedDoc();
+};
 
+pagedDoc.prototype.load = function(template){
+  if (template.setting && template.content){
+    $(this.wrapper).empty();
+    this.setting = template.setting;
+
+    const hasTitlePage = template.setting.hasTitlePage;
+    const {firstHeader, firstFooter, header, footer} = template.content.headerFooter;
+
+    for (const [i, page] of template.content.pageBody.entries()){
+      const {newPage, newPageHeader, newPageBody, newPageFooter} = this.append('end');
+      newPageBody.innerHTML = page.html;
+
+      if (i === 0) {
+        newPageHeader.innerHTML = (hasTitlePage)?(firstHeader?firstHeader:header):header;
+        newPageFooter.innerHTML = (hasTitlePage)?(firstFooter?firstFooter:footer):footer;
+      } else {
+        newPageHeader.innerHTML = header;
+        newPageFooter.innerHTML = footer;
+      }
+    }
+  }
+};
 
 pagedDoc.prototype.MHTMLTemplate = `
 MIME-Version: 1.0

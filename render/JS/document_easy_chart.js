@@ -3,8 +3,8 @@ const canvasStyleSheet = document.createElement('style');
 canvasStyleSheet.innerHTML = 'canvas{position: absolute;}';
 document.head.appendChild(canvasStyleSheet);
 // ======================= plot ======================================== //
-window.chart = function(container, viewmode){
-  this.init(container);
+window.chart = function(container, type='MDF-stack'){
+  this.init(container, type);
 
   if (!$.globalStorage.blurSubscribers){
     $.globalStorage.blurSubscribers = [this];
@@ -13,16 +13,16 @@ window.chart = function(container, viewmode){
   }
 };
 
-chart.prototype.init = function(container, viewmode=0){
+chart.prototype.init = function(container, type){
   const thisChart = this;
 
   this.status = 'idle';
   this.container = container?container:this.container;
-  this.viewmode = viewmode;
+  this.type = type;
   const width = this.width?this.width:this.container.clientWidth;
   const height= this.height?this.height:this.container.clientHeight;
 
-  if (viewmode === 0){
+  if (type === 'MDF-stack'){
     /*
       @ layer 40: cursor
       @ layer 30: plot
@@ -862,8 +862,7 @@ line.prototype.draw2 = function(options){
   let defaultSetting = {
     niceTimeDomain: false,
     niceValueDomain: false,
-    viewmode: 0,
-    drawmode: 1,
+    viewmode: 'stack',
   };
 
   this.setting = $.extend(defaultSetting, options);
@@ -942,7 +941,7 @@ line.prototype.draw2 = function(options){
         const toY = group.toY;
 
         // update value axis
-        if (this.setting.viewmode === 0){
+        if (this.setting.viewmode === 'stack'){
           axisLeft.style.tickCount = 5;
           if (!group.bitGroup){
             if (this.setting.niceValueDomain || group.niceValueDomain) group.groupValueDomain = nice(group.groupValueDomain[0], group.groupValueDomain[1], axisLeft.style.tickCount-1);
