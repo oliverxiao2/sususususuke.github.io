@@ -2,50 +2,84 @@
 <head>
     <meta charset="UTF-8">
     <title>小智</title>
-    <link rel="stylesheet" type="text/css" href="render/render.css">
+    <link rel="stylesheet" type="text/css" href="render/css/easyui.css">
+    <link rel="stylesheet" type="text/css" href="render/css/icon.css">
 
     <script src='render/jquery-3.2.0.min.js'></script>
-    <script src='render/jquery.easyui.min.min.js'></script>
-    <script src="render/render.js" defer></script>
+    <script src='render/jquery.easyui.min.js'></script>
+    <script src="render/JS/document_easy_chart.js" defer></script>
+    <script src="render/JS/document_easy_page.js" defer></script>
+    <script src="render/JS/document_easy_algorithm.class.js" defer></script>
+    <script src="render/JS/document_easy_algorithm.lib.js" defer></script>
 
-    <style>:focus{outline: none;}</style>
+    <script src="render/JS/document_easy.js" defer></script>
+    <script src="render/JS/jquery.scrollTo.min.js"></script>
+
+    <script src='../src/draw.js'></script>
+    <script src="render/JS//FileSaver.min.js"></script>
+    <script src='render/JS//MDF.0.9.js'></script>
+    <style>
+        :focus{outline: none;}
+        ::-webkit-scrollbar {width: 6px; height: 6px;}
+        ::-webkit-scrollbar-track {-webkit-box-shadow: inset 0 0 2px rgba(0,0,0,0.3);}
+        ::-webkit-scrollbar-thumb {background-color: #3879d9;}
+    </style>
 </head>
 <body style="padding: 0; margin: 0; overflow-y:hidden;">
     <div id="body-wrapper" style="display: flex; flex-direction: column;width: 100%; height: 100%;">
         <!-- 顶部固定工具栏 -->
-        <div id="fixed-menubar" style="padding:5px;height: 30px;border: none;background: whitesmoke;border-bottom: 1px solid #CCC;margin-bottom:5px;">
-            <a href="#" class="easyui-linkbutton" data-options="plain:true"></a>
-            <a href="#" class="easyui-menubutton" data-options="menu:'#mm1'">Edit</a>
-            <a href="#" class="easyui-menubutton" data-options="menu:'#mm2'">Help</a>
+        <div id="fixed-menubar" style="padding:5px;height: 30px;border: none;background: whitesmoke;border-bottom: 1px solid #CCC;margin-bottom:5px;box-shadow:0px 1px 4px rgba(0, 0, 0, 0.2);">
+            <a href="#" class="easyui-linkbutton" data-options="plain:true">
+              <font style="font-family: 'Georgia'; font-size:23px; color:#3879d9; text-shadow:0px 2px 5px rgba(56, 121, 217, 0.2);"> I, Robot </font>
+            </a>
+            <a href="#" class="easyui-menubutton" data-options="menu:'#mm-file'">文件</a>
+            <a href="#" class="easyui-menubutton" data-options="menu:'#mm1'">编辑</a>
+            <a href="#" class="easyui-menubutton" data-options="menu:'#mm-align'">对齐</a>
             <a href="#" class="easyui-menubutton" data-options="menu:'#mm-font'">字体</a>
             <a href="#" class="easyui-menubutton" data-options="menu:'#mm-table'">表格</a>
+            <a href="#" class="easyui-menubutton" data-options="">批处理</a>
+            <a href="#" class="easyui-menubutton" data-options="">帮助</a>
+        </div>
+        <div id="mm-file" style="width:150px;">
+          <div>
+            <span>测量文件</span>
+            <div>
+              <div>导入</div>
+              <div>快速查看</div>
+            </div>
+          </div>
+          <div>
+            <span>文档模板</span>
+            <div>
+              <div>导入</div>
+              <div>快速查看</div>
+            </div>
+          </div>
+          <div class="menu-sep"></div>
+          <div>
+            <span>输出为</span>
+            <div>
+              <div>Word</div>
+              <div>PDF</div>
+              <div>文档模板</div>
+            </div>
+          </div>
         </div>
         <div id="mm1" style="width:150px;">
-            <div data-options="iconCls:'icon-undo'">Undo</div>
-            <div data-options="iconCls:'icon-redo'">Redo</div>
+            <div data-options="iconCls:'icon-undo'">撤销</div>
+            <div data-options="iconCls:'icon-redo'">重做</div>
             <div class="menu-sep"></div>
-            <div>Cut</div>
-            <div>Copy</div>
-            <div>Paste</div>
+            <div>剪切</div>
+            <div>复制</div>
+            <div>粘贴</div>
             <div class="menu-sep"></div>
-            <div>
-                <span>Toolbar</span>
-                <div>
-                    <div>Address</div>
-                    <div>Link</div>
-                    <div>Navigation Toolbar</div>
-                    <div>Bookmark Toolbar</div>
-                    <div class="menu-sep"></div>
-                    <div>New Toolbar...</div>
-                </div>
-            </div>
-            <div data-options="iconCls:'icon-remove'">Delete</div>
-            <div>Select All</div>
+            <div data-options="iconCls:'icon-remove'">删除当前页</div>
+            <div>清空文档</div>
         </div>
-        <div id="mm2" style="width:100px;">
-            <div>Help</div>
-            <div>Update</div>
-            <div>About</div>
+        <div id="mm-align" style="width:100px;">
+            <div id="mm-align-left" onselectstart="return false;">左对齐</div>
+            <div id="mm-align-center" onselectstart="return false;">居中</div>
+            <div id="mm-align-right" onselectstart="return false;">右对齐</div>
         </div>
         <div id="mm-font" style="width:100px;">
           <div>
@@ -75,38 +109,89 @@
           </div>
         </div>
         <div id="mm-table" style="width:100px;">
+          <div>上方添加行</div>
+          <div>下方添加行</div>
+          <div>左侧添加列</div>
+          <div>右侧添加列</div>
         </div>
 
         <div class="easyui-layout" style="height: 100%;">
           <div data-options="region: 'west', split: true" title="" style="width:300px;border:none;">
             <div class="easyui-accordion"  style="height: 100%;">
                 <!-- File Manager -->
-                <input type="file" id="input-file" style="display: none;" multiple />
-                <div title="文件管理器" data-options="collapsed:false" style="padding:10px;height:320px;">
+                <div id="ac-file-explorer" title="文件管理器" data-options="collapsed:false" style="padding:10px;height:320px;">
+                  <input type="file" id="input-file" style="display: none;" multiple />
                     <ul id='file-explorer' class="easyui-tree" data-options="dnd:true, onContextMenu: function(e,node){e.preventDefault();$(this).tree('select',node.target);$('#mm').menu('show',{left: e.pageX,top: e.pageY});}">
-                        <li>
-                            <span>My Documents</span>
-                            <ul>
-                                <li>_Blank</li>
-                            </ul>
-                        </li>
+                      <li>
+                        <span>My Documents</span>
+                        <ul>
+                          <li>Import Files Here...</li>
+                        </ul>
+                      </li>
                     </ul>
                 </div>
 
                 <div title="文档结构" data-options="" style="padding:10px;">
-                    <span title="OKOKOKO">skjfwefwlef</span>
+                  <ul id='tree-document-structure' class="easyui-tree">
+                    <li>
+                      <span>页面</span>
+                      <ul>
+                        <li>第一页</li>
+                      </ul>
+                    </li>
+                    <li>
+                      <span>数据源</span>
+                      <ul>
+                          <li>空</li>
+                      </ul>
+                    </li>
+                    <li>
+                      <span>插图</span>
+                      <ul>
+                          <li>空</li>
+                      </ul>
+                    </li>
+                  </ul>
                 </div>
 
-                <div title="属性面板" data-options="" style="padding:10px;">
-                    <p>just do it!</p>
+                <div title="插图属性" data-options="">
+                  <table id="pg" class="easyui-propertygrid" data-options='
+                      showHeader: false,
+                      showGroup: true,
+                      data:{"total":4,"rows":[
+                        {"name":"名称","value":"插图1","group":"插图名称","editor":"text"},
+                        {"name":"时间轴最小值","value":"0","group":"文件1","editor":{type:"numberbox", options:{precision:2}}},
+                        {"name":"时间轴最大值","value":"2000","group":"文件1","editor":{type:"numberbox", options:{precision:2}}},
+                        {"name":"SSN","value":"123-456-7890","group":"坐标轴","editor":"text"},
+                        {"name":"Email","value":"bill@gmail.com","group":"坐标轴","editor":"text"},
+                      ]}'>
+                    <thead>
+                      <tr>
+                          <th data-options="field:'name'">属性</th>
+                          <th data-options="field:'value'">值</th>
+                      </tr>
+                    </thead>
+                  </table>
+                </div>
+
+                <div title="算法列表">
+                  <a href="#" class="easyui-linkbutton">新建</a>
+                  <a href="#" class="easyui-linkbutton">删除</a>
+                  <a href="#" class="easyui-linkbutton">复制</a>
+                  <a href="#" class="easyui-linkbutton">编辑</a>
+                  <select style="width: 100%; border-left:none; border-right:none;margin: 10px 0px 10px 0px;" multiple>
+                    <option value="">首个上升沿</option>
+                    <option value="">末个上升沿</option>
+                  </select>
                 </div>
             </div>
           </div>
           <div data-options="region: 'center'" title="" style="border:none;">
-            <div id='tabs-workplace' class="easyui-tabs" data-options="plain:true" style="width: 900px;height:100%;padding-left:5px;">
+            <div id='tabs-workplace' class="easyui-tabs" data-options="plain:true" style="width: 900px;height:100%;">
                 <div id="tab-document" title="文档" style="padding: 10px auto;"></div>
-                <div title="插图" data-options="iconCls:'icon-help',closable:true">
-                    <pre>文档插图汇总</pre>
+                <div title="算法" data-options="iconCls:'icon-help',closable:true" style="padding: 10px;">
+                  <img src="../resource/png/cover.jpg">
+                    <pre><code></code></pre>
                 </div>
             </div>
           </div>
@@ -114,19 +199,110 @@
     </div>
     <!-- global window & dialog & menu -->
 
-    <div id="w-document-variable" class="easyui-window" data-options="closed:true" style="width:400px; height:600px;" title="页面变量">
-        <div>
+    <div id="w-document-algorithm" class="easyui-window" data-options="closed:true" style="width:600px; height:400px;" title="算法">
+      <div class="easyui-layout" style="width:100%;height:100%;">
+        <div data-options="region:'west', split:true" style="width:175px;border:none;">
+          <style>
+          #w-document-algorithm form label{
+            display:inline-block;
+            width:32px;
+            font-size: 12px;
+            font-family: "Microsoft YaHei";
+          }
+          #w-document-algorithm form input,
+          #w-document-algorithm form select{
+            width: 120px;
+            font-size: 12px;
+            font-family: "Microsoft YaHei";
+          }
+          </style>
+          <form>
+            <div style="margin:5px;">
+              <label for="w-document-algorithm-name">名称</label>
+              <input id="w-document-algorithm-name" />
+            </div>
+            <div style="margin:5px;">
+              <label for="w-document-algorithm-id">ID</label>
+              <input id="w-document-algorithm-id" />
+            </div>
+            <div style="margin:5px;">
+              <label for="w-document-algorithm-type">类型</label>
+              <select id="w-document-algorithm-type">
+                <option value="Javascript">Javascript</option>
+                <option value="Matlab">Matlab</option>
+                <option value="Excel description">Excel 描述</option>
+              </select>
+            </div>
+            <div style="margin:5px;border-top:1px solid #ccc;">
+              <span style="display:block; line-height:25px;">输入（数据源）</span>
+              <label for="w-document-algorithm-inputType">类型</label>
+              <select id="w-document-algorithm-inputType">
+                <option>MDF测量文件</option>
+                <option>Excel文件</option>
+              </select>
+            </div>
+            <div style="margin:5px;">
+              <label for="w-document-algorithm-inputFile">文件</label>
+              <select id="w-document-algorithm-inputFile">
+                <option>*.dat</option>
+              </select>
+            </div>
+            <div style="margin:5px;">
+              <label for="w-document-algorithm-inputChannel">通道</label>
+              <input id="w-document-algorithm-inputChannel" />
+            </div>
+            <div style="margin:5px;border-top:1px solid #ccc;">
+              <span style="display:block; line-height:25px;">输出</span>
+              <label for="w-document-algorithm-outputType">类型</label>
+              <select id="w-document-algorithm-outputType">
+                <option value="number">数值</option>
+                <option value="numberArray">数值数组</option>
+                <option value="stringArray">字符串数组</option>
+                <option value="timeDomain">时间域范围</option>
+                <option value="valueDomain">值域范围</option>
+                <option value="t-vDomain">时间域+值域范围</option>
+                <option value="string">字符串</option>
+                <option value="bool">布尔值</option>
+              </select>
+            </div>
+            <div style="margin:5px;">
+              <label for="w-document-algorithm-result">结果</label>
+              <input id="w-document-algorithm-result" style="font-weight:600;" />
+            </div>
+            <div style="margin:5px;">
+              <label for="w-document-algorithm-bind">绑定</label>
+              <select id="w-document-algorithm-bind"></select>
+            </div>
+          </form>
         </div>
+        <div data-options="region:'center'" style="">
+          <div>
+            <a href="#" class="easyui-linkbutton" id="w-document-algorithm-btn-run">运行</a>
+            <a href="#" class="easyui-linkbutton">保存</a>
+          </div>
+          <div>
+            <textarea style="width:100%; " id="w-document-algorithm-code-data"></textarea>
+          </div>
+        </div>
+      </div>
     </div>
 
     <div id="mm-document" class="easyui-menu" style="width:150px;" data-options="duration: 2000">
         <div>
             <span>插入</span>
             <div style="width:150px;">
-                <div id="mm-document-create-page">空白页</div>
+                <div>
+                  <span>空白页</span>
+                  <div>
+                    <div id="mm-document-create-page-start">文档开头</div>
+                    <div id="mm-document-create-page-end">文档结尾</div>
+                    <div id="mm-document-create-page-before">当前页之前</div>
+                    <div id="mm-document-create-page-after">当前页之后</div>
+                  </div>
+                </div>
                 <div id="mm-document-create-table">表格</div>
                 <div id="mm-document-create-chart">插图</div>
-                <div id="mm-document-create-ol">有序列表</div>
+                <div id="mm-document-create-ol" role="kkk">有序列表</div>
                 <div id="mm-document-create-ul">无序列表</div>
             </div>
         </div>
@@ -143,12 +319,19 @@
             <span>插图</span>
             <div>
                 <div id="mm-document-chart-data">数据</div>
-                <div id="mm-document-chart-axis">坐标轴</div>
+                <div id="mm-document-chart-axis">
+                  <span>坐标轴</span>
+                  <div>
+                    <div id="mm-document-chart-axis-autoscale-x">x轴自适应</div>
+                    <div id="mm-document-chart-axis-autoscale-y">y轴自适应</div>
+                    <div id="mm-document-chart-axis-autoscale-xy">x轴/y轴自适应</div>
+                  </div>
+                </div>
                 <div id="mm-document-chart-clear-shadow">修复阴影</div>
             </div>
         </div>
         <div class="menu-sep"></div>
-        <div id="mm-document-show-variable">变量</div>
+        <div id="mm-document-show-algorithm">算法</div>
         <div>
           <span>删除</span>
           <div>
@@ -159,14 +342,15 @@
 
     <!-- 文件管理器右键菜单 -->
     <div id="mm" class="easyui-menu" style="width:120px;">
-        <div id="fm-contextmenu-append"  data-options="iconCls:'icon-add'">Append</div>
-        <div id="fm-contextmenu-remove"  data-options="iconCls:'icon-remove'">Remove</div>
+        <div id="fm-contextmenu-append"  data-options="iconCls:'icon-add'">添加项</div>
+        <div id="fm-contextmenu-remove"  data-options="iconCls:'icon-remove'">删除</div>
         <div class="menu-sep"></div>
-        <div id="fm-contextmenu-import">Import</div>
+        <div id="fm-contextmenu-import">导入</div>
+        <div id="fm-contextmenu-">快速查看</div>
     </div>
 
     <!-- window: chart data -->
-    <div id="w-document-chart-data" class="easyui-window" data-options="closed:true" style="width:800px; height:600px;" title="数据">
+    <div id="w-document-chart-data" class="easyui-window" data-options="closed:true" style="width:600px; height:400px;" title="数据">
         <div style="display: flex;">
             <form>
                 <a id="w-document-chart-data-btn-update" href="#" class="easyui-linkbutton" data-options="plain:true,iconCls:'icon-add'">绘图</a>
@@ -233,7 +417,7 @@
                     onContextMenu: function(e,node){
                         e.preventDefault();
                         $(this).tree('select',node.target);
-                        $('#mm-5').menu('show',{
+                        $('#mm-chart-data').menu('show',{
                             left: e.pageX,
                             top: e.pageY
                         });
@@ -243,7 +427,6 @@
                         <span>Group 1</span>
                             <ul>
                                 <li>nmot_w</li>
-                                <li>gangi</li>
                             </ul>
                     </li>
                 </ul>
@@ -252,8 +435,10 @@
 
     </div>
 
-    <div id="mm-5" class="easyui-menu" style="width: 120px;">
-        <div>新建组</div>
+    <div id="mm-chart-data" class="easyui-menu" style="width: 120px;">
+        <div id="mm-chart-data-add-group">新建组</div>
+        <div id="mm-chart-data-remove-tree-node">删除</div>
     </div>
 </body>
+
 </html>
