@@ -55,6 +55,10 @@ pagedDoc.prototype.init = function(container, option){
     this.wrapper.style.overflowY = 'scroll';
     this.container.appendChild(this.wrapper);
     this.append();
+
+    this.wrapper.addEventListener('paste', function(e){
+      console.log(e.clipboardData.getData("text"));
+    });
 };
 
 pagedDoc.prototype.append = function(where){
