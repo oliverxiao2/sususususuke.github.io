@@ -17,6 +17,7 @@ window.pagedDoc = function(container, option){
 };
 
 pagedDoc.prototype.init = function(container, option){
+    let self = this;
     this.container = container;
     let defaultSetting = {
         pageSize: 'A4',
@@ -55,7 +56,86 @@ pagedDoc.prototype.init = function(container, option){
     this.wrapper.style.overflowY = 'scroll';
     this.container.appendChild(this.wrapper);
     this.append();
+
+    document.addEventListener('paste', function(e){
+      e.preventDefault();
+      for (const [i, item] of Array.from(e.clipboardData.items).entries()){
+        if (item.kind === 'string' && item.type === 'text/plain'){
+          item.getAsString(function(d){
+            //document.execCommand('insertText', false, d)
+          });
+        }
+
+        if (item.kind === 'string' && item.type === 'text/html'){
+          item.getAsString(function(d){
+            let height = 0, nodeHeight = 0, scrolledHeight = 0;
+            const matchResult = d.match(/\<\!\-\-StartFragment\-\-\>([\s\S]*)\<\!\-\-EndFragment\-\-\>/);
+            const temp_box = document.getElementById('tab-fluid-document-container');
+            let currentPage = self.getThisPage();
+            let currentPageBody = currentPage.querySelector('div[role=page-body]');
+            let currentPageBodyHeight = currentPageBody.clientHeight;
+            temp_box.innerHTML = '';
+
+            let frag0 = matchResult?matchResult[1]:matchResult;//document.execCommand('insertHTML', false, frag0);
+            let frag = frag0.replace(/\bclass=.+?[\b|\>]/g, function(a){
+              return a[a.length-1];
+            });
+            frag = frag.replace(/\<\!\-\-\[if gte vml[\s\S]*?\<\!\[endif\]\-\-\>/g, function(a){
+              return '';
+            });
+            frag = frag.replace(/\<\!\[if \!vml\]\>([\s\S]*?)\<\!\[endif\]\>/g, function(a, b){
+              let height = 400;
+              const m = b.match(/img width\=[\d]+ height\=([\d]+)/);
+              if (m) height = m[1];
+              return '<span style="line-height:' + height + 'px;display:block;" role="image-place-holder">插图占位符</span>';
+            })
+            window.docFrag = document.createElement('div');
+            $(temp_box).focus();
+            temp_box.innerHTML = (frag);
+            console.log(frag0);console.log(frag);
+            //document.execCommand('insertHTML', false, frag);console.log(frag);
+
+            for (const node of temp_box.querySelectorAll('*')){
+              console.log(node, node.innerText);
+              if ($.trim(node.innerHTML) === '') {
+                console.log('blank', node);
+
+                node.outerHTML = "&nbsp;"
+              }
+            }
+
+            for (const node of Array.from(temp_box.childNodes)){
+              if (node.style){
+                if (parseFloat(node.style.marginLeft) < 0) {
+                  node.style.marginLeft = 0;
+                }
+              }
+              if (node.clientHeight) {
+                nodeHeight = (parseFloat($(node).css('marginTop')) + parseFloat($(node).css('marginBottom')) + node.clientHeight)
+                height = (node.offsetTop + node.clientHeight + parseFloat($(node).css('marginBottom'))) - scrolledHeight;
+                if (height > currentPageBodyHeight){
+                  scrolledHeight = node.offsetTop;
+                  currentPageBody = self.append().newPageBody;
+                  $(currentPageBody).append(node.outerHTML);
+                } else {
+                  $(currentPageBody).append(node.outerHTML);
+                }
+              }
+            }
+
+            $(self.wrapper).find('span[role=image-place-holder]').each(function(){
+              const width = $(this).width();
+              const height= $(this).height();
+              this.outerHTML = '<img width="' + width + '" height="' + height + '" />';
+              console.log(this);
+            });
+          });
+        }
+      }
+
+    });
 };
+
 
 pagedDoc.prototype.append = function(where){
   let newPage = document.createElement('div'),
@@ -117,6 +197,20 @@ pagedDoc.prototype.append = function(where){
 
   this.save();
   return {newPage, newPageHeader, newPageBody, newPageFooter};
+};
+
+pagedDoc.prototype.getThisPage = function(){
+  let currentPage;
+  const wrapper = this.wrapper;
+  if ($ && $.globalStorage && $.globalStorage.range){
+    const _el = $.globalStorage.range.commonAncestorContainer;
+    $(wrapper).find('div[role=page]').each(function(){
+      if (this.contains(_el)) {
+        currentPage = this;
+      }
+    });
+    return currentPage;
+  }
 };
 
 pagedDoc.prototype.save = function(){

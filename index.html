@@ -22,6 +22,7 @@
         ::-webkit-scrollbar {width: 6px; height: 6px;}
         ::-webkit-scrollbar-track {-webkit-box-shadow: inset 0 0 2px rgba(0,0,0,0.3);}
         ::-webkit-scrollbar-thumb {background-color: #3879d9;}
+
     </style>
 </head>
 <body style="padding: 0; margin: 0; overflow-y:hidden;">
@@ -114,6 +115,9 @@
           <div>下方添加行</div>
           <div>左侧添加列</div>
           <div>右侧添加列</div>
+          <div id="mm-table-valign-top" onselectstart="return false;">顶部对齐</div>
+          <div id="mm-table-valign-middle" onselectstart="return false;">垂直居中</div>
+          <div id="mm-table-valign-bottom" onselectstart="return false;">底端对齐</div>
         </div>
 
         <div class="easyui-layout" style="height: 100%;">
@@ -190,11 +194,17 @@
           <div data-options="region: 'center'" title="" style="border:none;">
             <div id='tabs-workplace' class="easyui-tabs" data-options="plain:true" style="width: 900px;height:100%;">
                 <div id="tab-document" title="文档" style="padding: 10px auto;"></div>
+
                 <div title="算法" data-options="iconCls:'icon-help',closable:true" style="padding: 10px;">
                   <img src="resource/png/cover.jpg">
                     <pre><code></code></pre>
                 </div>
             </div>
+          </div>
+        </div>
+
+        <div id="tab-fluid-document" title="无分页文档" style="padding: 10px;position:absolute;left:1000pt;top:180px;font-family: '宋体'; font-size: 14pt;">
+          <div id="tab-fluid-document-container" style="border:1px solid;width: 595pt;height:624pt;margin: 10px auto;overflow:scroll;" contenteditable="true">
           </div>
         </div>
     </div>
