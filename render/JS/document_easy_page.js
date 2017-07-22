@@ -133,6 +133,8 @@ pagedDoc.prototype.init = function(container, option){
         }
       }
 
+=======
+    this.wrapper.addEventListener('paste', function(e){
     });
 };
 
