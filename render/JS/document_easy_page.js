@@ -133,12 +133,6 @@ pagedDoc.prototype.init = function(container, option){
         }
       }
 
-=======
-    this.wrapper.addEventListener('paste', function(e){
-    });
-};
-
-
 pagedDoc.prototype.append = function(where){
   let newPage = document.createElement('div'),
       newPageHeader = document.createElement('div'),
