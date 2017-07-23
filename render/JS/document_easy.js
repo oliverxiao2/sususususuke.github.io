@@ -53,6 +53,53 @@ $.globalStorage = {
     algorithmObjList: {},
     selectedAlgorithm: null,
     testChannel: [],
+    broadcastUpdateChartPropPanel: function($pgID){
+      if ($ && $.globalStorage && $.globalStorage.activeChart){
+        const chart = $.globalStorage.activeChart;
+        const data = $.globalStorage.activeChart.plot.data;
+        let rows = [], groupIndex = 0;
+        for (const filename in data){
+          for (const group of data[filename].dataGroup){
+            groupIndex++;
+            for (const channel of group.channels){
+              rows.push({
+                name: '通道名称',
+                value: channel.name,
+                group: 'Group'+groupIndex,
+              });
+            }
+          }
+        }
+
+        $('#'+$pgID).propertygrid('loadData', {
+          rows: rows,
+        });
+      }
+    },
+    broadcastUpdateChartDataTree: function($treeID){
+      if ($.globalStorage.activeChart){
+        const chart = $.globalStorage.activeChart;
+        const data = $.globalStorage.activeChart.plot.data;
+        let d=[], groupIndex = 0;
+        for (const filename in data){
+          for (const group of data[filename].dataGroup){
+            groupIndex++;
+            const dg = {
+              text: 'Group' + groupIndex,
+              children: [],
+            };
+            d.push(dg);
+            for (const channel of group.channels){
+              dg.children.push({
+                text: channel.name,
+              });
+            }
+          }
+        }
+
+        $('#'+$treeID).tree({data:d})
+      }
+    },
 };
 for (let i=0; i<100; i++){
   $.globalStorage.testChannel.push({
@@ -254,7 +301,7 @@ $('#mm-document-create-chart').click(function () {
 
 $('#mm-document-chart-data').click(function(){
     $('#w-document-chart-data').window('open');
-
+    $.globalStorage.broadcastUpdateChartDataTree('w-document-chart-tree');
 });
 
 $('#w-document-chart-data-btn-update').click(function(){

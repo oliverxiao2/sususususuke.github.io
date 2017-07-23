@@ -820,28 +820,32 @@ line.prototype.bindMDF = function(file, channels){
             if (!maxSharedTimeDomain) maxSharedTimeDomain = shared_x_domain;
             else maxSharedTimeDomain = [Math.min(maxSharedTimeDomain[0], shared_x_domain[0]), Math.max(maxSharedTimeDomain[1], shared_x_domain[1])];
 
-            theGroup.channels.push({
-              'name': shortname,
-              'timeArray': timeArray,
-              'valueArray': valueArray,
-              'timeDomain': time_domain,
-              'valueDomain': value_domain,
-              'totalTimeArray': totalTimeArray,
-              'totalValueArray': totalValueArray,
-              'cursor': [],
-            });
+            if (valueArray.length > 0 && timeArray.length > 0){
+              theGroup.channels.push({
+                'name': shortname,
+                'timeArray': timeArray,
+                'valueArray': valueArray,
+                'timeDomain': time_domain,
+                'valueDomain': value_domain,
+                'totalTimeArray': totalTimeArray,
+                'totalValueArray': totalValueArray,
+                'cursor': [],
+              });
+            }
 
           }
         }
 
-        theGroup.groupTimeDomain  = shared_x_domain;
-        theGroup.groupValueDomain = shared_y_domain;
-        // maybe there are more than one file. Here can't know the total group count.
-        //theGroup.fromY = groupHeight - this.style.strokeWidth/2;
-        //theGroup.toY = this.style.strokeWidth/2;
+        if (theGroup.channels.length > 0){
+          theGroup.groupTimeDomain  = shared_x_domain;
+          theGroup.groupValueDomain = shared_y_domain;
+          // maybe there are more than one file. Here can't know the total group count.
+          //theGroup.fromY = groupHeight - this.style.strokeWidth/2;
+          //theGroup.toY = this.style.strokeWidth/2;
 
-        this.data[fileUID].dataGroup.push(theGroup);
-        this.totalGroupCount += 1;
+          this.data[fileUID].dataGroup.push(theGroup);
+          this.totalGroupCount += 1;
+        }
 
       }
     }
