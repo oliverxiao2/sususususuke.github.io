@@ -17,121 +17,132 @@ window.pagedDoc = function(container, option){
 };
 
 pagedDoc.prototype.init = function(container, option){
-    let self = this;
-    this.container = container;
-    let defaultSetting = {
-        pageSize: 'A4',
-        hasTitlePage: true,
-        margin: '2.54cm 3.17cm 2.54cm 3.17cm',
-        marginTop: '2.54cm',
-        marginBottom: '2.54cm',
-        marginLeft: '1.5cm',
-        marginRight: '1.5cm',
-        headerMarginTop: '1.5cm',
-        footerMarginBottom: '1.5cm',
-        defaultFontFamily: 'Segoe UI',
-        defaultFontSize: '14pt',
-    };
-    this.setting = $.extend(defaultSetting, option);
+  let self = this;
+  this.container = container;
+  let defaultSetting = {
+      pageSize: 'A4',
+      hasTitlePage: true,
+      margin: '2.54cm 3.17cm 2.54cm 3.17cm',
+      marginTop: '2.54cm',
+      marginBottom: '2.54cm',
+      marginLeft: '1.5cm',
+      marginRight: '1.5cm',
+      headerMarginTop: '1.5cm',
+      footerMarginBottom: '1.5cm',
+      defaultFontFamily: 'Segoe UI',
+      defaultFontSize: '14pt',
+  };
+  this.setting = $.extend(defaultSetting, option);
 
-    this.content = {
-      headerFooter: {
-        firstHeader: '',
-        firstFooter: '',
-        header: '',
-        footer: '',
-      },
-      pageBody: [],
-      charts: [],
-      files: [],
-      algorithmQuery: {},
-    };
+  this.content = {
+    headerFooter: {
+      firstHeader: '',
+      firstFooter: '',
+      header: '',
+      footer: '',
+    },
+    pageBody: [],
+    charts: [],
+    files: [],
+    algorithmQuery: {},
+  };
 
-    this.wrapper = document.createElement('div');
-    this.wrapper.style.display = 'flex';
-    this.wrapper.style.flexDirection = 'column';
-    this.wrapper.style.alignItems = 'center';
-    this.wrapper.style.width = '100%';
-    this.wrapper.style.height = '100%';
-    this.wrapper.style.overflowY = 'scroll';
-    this.container.appendChild(this.wrapper);
-    this.append();
+  this.wrapper = document.createElement('div');
+  this.wrapper.style.display = 'flex';
+  this.wrapper.style.flexDirection = 'column';
+  this.wrapper.style.alignItems = 'center';
+  this.wrapper.style.width = '100%';
+  this.wrapper.style.height = '100%';
+  this.wrapper.style.overflowY = 'scroll';
+  this.container.appendChild(this.wrapper);
+  this.append();
 
-    document.addEventListener('paste', function(e){
-      e.preventDefault();
-      for (const [i, item] of Array.from(e.clipboardData.items).entries()){
-        if (item.kind === 'string' && item.type === 'text/plain'){
-          item.getAsString(function(d){
-            //document.execCommand('insertText', false, d)
+  this.wrapper.addEventListener('paste', function(e){
+    e.preventDefault();
+    for (const [i, item] of Array.from(e.clipboardData.items).entries()){
+
+      if (item.kind === 'string' && item.type === 'text/html'){
+        item.getAsString(function(d){
+          let height = 0, nodeHeight = 0, scrolledHeight = 0;
+          const matchResult = d.match(/\<\!\-\-StartFragment\-\-\>([\s\S]*)\<\!\-\-EndFragment\-\-\>/);
+          const temp_box = document.getElementById('tab-fluid-document-container');
+          let currentPage = self.getThisPage();
+          let currentPageBody = currentPage.querySelector('div[role=page-body]');
+          let currentPageBodyHeight = currentPageBody.clientHeight;
+          temp_box.innerHTML = '';
+
+          let frag0 = matchResult?matchResult[1]:matchResult;
+          let frag = frag0.replace(/\bclass\=.+?\b/g, '');
+          frag = frag.replace(/\<\!\-\-\[if gte vml[\s\S]*?\<\!\[endif\]\-\-\>/g, function(a){
+            return '';
           });
-        }
+          frag = frag.replace(/\<\!\[if \!vml\]\>([\s\S]*?)\<\!\[endif\]\>/g, function(a, b){
+            let height = 400;
+            const m = b.match(/img width\=[\d]+ height\=([\d]+)/);
+            if (m) height = m[1];
+            return '<span style="line-height:' + height + 'px;display:block;" role="image-place-holder">插图占位符</span>';
+          })
+          window.docFrag = document.createElement('div');
+          temp_box.innerHTML = (frag);
+          //document.execCommand('insertHTML', false, frag);console.log(frag);
 
-        if (item.kind === 'string' && item.type === 'text/html'){
-          item.getAsString(function(d){
-            let height = 0, nodeHeight = 0, scrolledHeight = 0;
-            const matchResult = d.match(/\<\!\-\-StartFragment\-\-\>([\s\S]*)\<\!\-\-EndFragment\-\-\>/);
-            const temp_box = document.getElementById('tab-fluid-document-container');
-            let currentPage = self.getThisPage();
-            let currentPageBody = currentPage.querySelector('div[role=page-body]');
-            let currentPageBodyHeight = currentPageBody.clientHeight;
-            temp_box.innerHTML = '';
+          for (const node of temp_box.querySelectorAll('*')){
+            if ($.trim(node.innerHTML) === '') node.outerHTML = "&nbsp;"
+          }
 
-            let frag0 = matchResult?matchResult[1]:matchResult;//document.execCommand('insertHTML', false, frag0);
-            let frag = frag0.replace(/\bclass=.+?[\b|\>]/g, function(a){
-              return a[a.length-1];
-            });
-            frag = frag.replace(/\<\!\-\-\[if gte vml[\s\S]*?\<\!\[endif\]\-\-\>/g, function(a){
-              return '';
-            });
-            frag = frag.replace(/\<\!\[if \!vml\]\>([\s\S]*?)\<\!\[endif\]\>/g, function(a, b){
-              let height = 400;
-              const m = b.match(/img width\=[\d]+ height\=([\d]+)/);
-              if (m) height = m[1];
-              return '<span style="line-height:' + height + 'px;display:block;" role="image-place-holder">插图占位符</span>';
-            })
-            window.docFrag = document.createElement('div');
-            $(temp_box).focus();
-            temp_box.innerHTML = (frag);
-            console.log(frag0);console.log(frag);
-            //document.execCommand('insertHTML', false, frag);console.log(frag);
-
-            for (const node of temp_box.querySelectorAll('*')){
-              console.log(node, node.innerText);
-              if ($.trim(node.innerHTML) === '') {
-                console.log('blank', node);
-
-                node.outerHTML = "&nbsp;"
+          for (const node of Array.from(temp_box.childNodes)){
+            if (node.style){
+              $(node).css('marginLeft', '0px');
+              if (parseFloat($(node).css('marginRight')) < 0) $(node).css('marginRight', '0px');
+              if (parseFloat($(node).css('textIndent')) < 0) $(node).css('textIndent', '0px');
+            }
+            if (node.nodeType === 1) {
+              nodeHeight = (parseFloat($(node).css('marginTop')) + parseFloat($(node).css('marginBottom')) + node.clientHeight)
+              height = (node.offsetTop + node.clientHeight + parseFloat($(node).css('marginBottom'))) - scrolledHeight;
+              if (height > currentPageBodyHeight){
+                scrolledHeight = node.offsetTop;
+                currentPageBody = self.append().newPageBody;
+                $(currentPageBody).append(node.outerHTML);
+              } else {
+                $(currentPageBody).append(node.outerHTML);
               }
             }
+          }
 
-            for (const node of Array.from(temp_box.childNodes)){
-              if (node.style){
-                if (parseFloat(node.style.marginLeft) < 0) {
-                  node.style.marginLeft = 0;
-                }
-              }
-              if (node.clientHeight) {
-                nodeHeight = (parseFloat($(node).css('marginTop')) + parseFloat($(node).css('marginBottom')) + node.clientHeight)
-                height = (node.offsetTop + node.clientHeight + parseFloat($(node).css('marginBottom'))) - scrolledHeight;
-                if (height > currentPageBodyHeight){
-                  scrolledHeight = node.offsetTop;
-                  currentPageBody = self.append().newPageBody;
-                  $(currentPageBody).append(node.outerHTML);
-                } else {
-                  $(currentPageBody).append(node.outerHTML);
-                }
-              }
-            }
-
-            $(self.wrapper).find('span[role=image-place-holder]').each(function(){
-              const width = $(this).width();
-              const height= $(this).height();
-              this.outerHTML = '<img width="' + width + '" height="' + height + '" />';
-              console.log(this);
-            });
+          $(self.wrapper).find('span[role=image-place-holder]').each(function(){
+            const width = $(this).width();
+            const height= $(this).height();
+            this.outerHTML = '<img width="' + width + '" height="' + height + '" />';
+            console.log(this);
           });
+        });
+      }
+
+      if (item.kind === 'string' && item.type === 'text/plain'){
+        item.getAsString(function(d){
+          //document.execCommand('insertText', false, d)
+        });
+      }
+
+
+    }
+  });
+
+  this.wrapper.addEventListener('keydown', function(e){
+    if (e.code === 'Backspace'){
+      const currentPage = self.getThisPage();
+      if (currentPage){
+        const currentPageBody = currentPage.querySelector('div[role=page-body]');
+        if (currentPageBody.innerText === '') {
+          e.preventDefault();
+          currentPageBody.innerHTML = '<p><br /></p>';
         }
       }
+    }
+
+  });
+
+};
 
 pagedDoc.prototype.append = function(where){
   let newPage = document.createElement('div'),

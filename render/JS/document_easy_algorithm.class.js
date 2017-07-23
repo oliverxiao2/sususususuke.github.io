@@ -27,3 +27,6 @@ algorithmObj.prototype.init = function(){
 };
 
 /**********************************************************************/
+window.algorithmElement = function(options){
+
+};

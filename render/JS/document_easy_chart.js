@@ -72,6 +72,49 @@ chart.prototype.init = function(container, type){
 
       if ((evt.target.getAttribute('role') === 'plot-group') && thisChart.status === 'idle' && evt.buttons === 1 &&(!evt.altKey)) {
         thisChart.status = 'pan';
+        if (true){
+          const offsetX = evt.offsetX;
+          const file = evt.target.parentFile;
+          const currentX = (offsetX - file.fromX) * (file.windowTimeDomain[1] - file.windowTimeDomain[0]) / (file.toX - file.fromX) + file.windowTimeDomain[0];
+          let pixel, min, selectedCursorIndex;
+
+          for (const [index, cursor] of file.cursor.entries()){
+            pixel = Math.abs(cursor.time - currentX)/(file.windowTimeDomain[1] - file.windowTimeDomain[0]) * (file.toX - file.fromX);
+            if ((!min) || pixel < min) {
+              min = pixel;
+              selectedCursorIndex = index;
+            }
+          }
+
+          if (min < 5) {
+
+            if (file.cursor[selectedCursorIndex].style.selected){
+              thisChart.selectedCursor = null;
+            } else {
+              thisChart.selectedCursor = {
+                cursorArray: file.cursor,
+                index: selectedCursorIndex,
+              };
+            }
+
+            for (const [index, cursor] of file.cursor.entries()){
+              const style = cursor.style;
+              if (index != selectedCursorIndex || style.selected){
+                style.spineColor = 'rgb(255, 235, 59)';
+                style.markerColor = 'rgb(255, 235, 59)';
+                style.fontColor = 'black';
+                style.selected = false;
+              } else {
+                style.spineColor = '#ff9800';
+                style.markerColor = '#ff9800';
+                style.fontColor = 'white';
+                style.selected = true;
+              }
+            }
+
+            thisChart.plot.draw2(1);
+          }
+        }
       } else if (evt.target.getAttribute('role') === 'plot-group' && evt.altKey == true && thisChart.vCursor.style.display == 'block') {
         const canvas = evt.target;
         const offsetX = evt.offsetX;
@@ -192,52 +235,7 @@ chart.prototype.init = function(container, type){
     this.wrapper.addEventListener('click', function(evt){
       $.globalStorage.activeChart = thisChart;
       thisChart.focused = true;
-      if (evt.target.getAttribute('role') === 'plot-group' && (!evt.altKey)){
-        if (true){
-          const offsetX = evt.offsetX;
-          const file = evt.target.parentFile;
-          const currentX = (offsetX - file.fromX) * (file.windowTimeDomain[1] - file.windowTimeDomain[0]) / (file.toX - file.fromX) + file.windowTimeDomain[0];
-          let pixel, min, selectedCursorIndex;
 
-          for (const [index, cursor] of file.cursor.entries()){
-            pixel = Math.abs(cursor.time - currentX)/(file.windowTimeDomain[1] - file.windowTimeDomain[0]) * (file.toX - file.fromX);
-            if ((!min) || pixel < min) {
-              min = pixel;
-              selectedCursorIndex = index;
-            }
-          }
-
-          if (min < 5) {
-
-            if (file.cursor[selectedCursorIndex].style.selected){
-              thisChart.selectedCursor = null;
-            } else {
-              thisChart.selectedCursor = {
-                cursorArray: file.cursor,
-                index: selectedCursorIndex,
-              };
-            }
-
-            for (const [index, cursor] of file.cursor.entries()){
-              const style = cursor.style;
-              if (index != selectedCursorIndex || style.selected){
-                style.spineColor = 'rgb(255, 235, 59)';
-                style.markerColor = 'rgb(255, 235, 59)';
-                style.fontColor = 'black';
-                style.selected = false;
-              } else {
-                style.spineColor = '#ff9800';
-                style.markerColor = '#ff9800';
-                style.fontColor = 'white';
-                style.selected = true;
-              }
-            }
-
-
-            thisChart.plot.draw2(1);
-          }
-        }
-      }
     });
 
     this.layerOfPlot = document.createElement('div');
@@ -775,11 +773,11 @@ line.prototype.bindMDF = function(file, channels){
         let theCNBlock, totalTimeArray, totalTimeDomain, totalValueArray, totalValueDomain, valueArray, theTimeCNBlock, timeArray, time_domain, value_domain, shared_y_domain, shared_x_domain;
 
         for (const name of needle){
-          let shortname;
+          let regname = '', shortname = '';
           if (name.match(/\\/)){shortname = name.match(/^(.*)\\/)[1];}
           else {shortname = name;}
-
-          r = MDF.searchChannelsByRegExp(new RegExp('^' + shortname + '\\\\'));
+          regname = shortname.replace(/\[/g, '\\\[').replace(/\]/g, '\\\]')
+          r = MDF.searchChannelsByRegExp(new RegExp('^' + regname + '\\\\'));
 
           if (r.length > 0){
 

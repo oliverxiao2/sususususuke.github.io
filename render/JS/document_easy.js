@@ -457,7 +457,6 @@ $(document).ready(function(){
   //$('#mm-document').data().menu.options.duration = 1000;
   // ********* menubar ***************************//
   $('#mm-fontSize').click(function(e){
-    console.log(e, this);
     const fontSize = e.target.innerText;
     const el = $.globalStorage.range.commonAncestorContainer;
 
@@ -465,6 +464,44 @@ $(document).ready(function(){
       el.parentNode.style.fontSize = fontSize + 'pt';
     }
   });
+
+  $('#mm-font-line-height').click(function(){
+    configFont({
+      name: 'lineHeight',
+      value: (prompt("行高", 20))+'px',
+    });
+  });
+
+  function configFont(options){
+    if (options){
+      if ($ && $.globalStorage && $.globalStorage.range){
+        const el = $.globalStorage.range.commonAncestorContainer;
+
+        if (el.nodeType === 3){
+          if (el.parentNode.getAttribute && el.parentNode.getAttribute('role') === 'page-body'){
+            const newEl = document.createElement('p');
+            newEl.innerText = el.textContent;
+            el.parentNode.replaceChild(newEl, el);
+          } else {
+            $(el.parentNode).css(options.name, options.value);
+          }
+        } else if (el.nodeType === 1) {
+
+          if (el.getAttribute && el.getAttribute('role') === 'page-body'){
+            const newEl = document.createElement('p');
+            newEl.innerText = el.innerText;
+
+            el.innerText = '';
+            el.appendChild(newEl);
+            $(newEl).css(options.name, options.value);
+          }
+
+        }
+
+
+      }
+    }
+  }
 
   $('#menubar-edit-insert-html').click(function(){
     document.execCommand('insertHTML', false, prompt("插入HTML", ""));
