@@ -38,6 +38,10 @@
             <a href="#" class="easyui-menubutton" data-options="menu:'#mm-table'">表格</a>
             <a href="#" class="easyui-menubutton" data-options="">批处理</a>
             <a href="#" class="easyui-menubutton" data-options="">帮助</a>
+            <span>|</span>
+            <label class="l-btn-text">粘贴HTML自动分页</label><input id="menubar-paste-auto-paged" class="easyui-switchbutton">
+            <span>|</span>
+            <label class="l-btn-text">粘贴纯文本</label><input id="menubar-paste-text-plain" class="easyui-switchbutton">
         </div>
         <div id="mm-file" style="width:150px;">
           <div>
@@ -70,7 +74,7 @@
             <div class="menu-sep"></div>
             <div>剪切</div>
             <div>复制</div>
-            <div>粘贴</div>
+            <div id="menubar-paste-from-word">粘贴</div>
             <div class="menu-sep"></div>
             <div id="menubar-edit-insert-html" onselectstart="return false;">插入HTML</div>
             <div id="menubar-edit-insert-horizontal-rule" onselectstart="return false;">插入横线</div>
@@ -92,22 +96,7 @@
               <div>宋体</div>
             </div>
           </div>
-          <div>
-            <span>大小</span>
-            <div id="mm-fontSize">
-              <div>12</div>
-              <div>14</div>
-              <div>16</div>
-              <div>18</div>
-              <div>20</div>
-              <div>22</div>
-              <div>24</div>
-              <div>32</div>
-              <div>36</div>
-              <div>48</div>
-              <div>72</div>
-            </div>
-          </div>
+          <div id="mm-fontSize" onselectstart="return false;">大小</div>
           <div id="mm-font-line-height" onselectstart="return false;">行高</div>
         </div>
         <div id="mm-table" style="width:100px;">

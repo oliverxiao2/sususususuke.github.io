@@ -58,69 +58,87 @@ pagedDoc.prototype.init = function(container, option){
   this.append();
 
   this.wrapper.addEventListener('paste', function(e){
+    const autoPaged = $('#menubar-paste-auto-paged').switchbutton().data().switchbutton.options.checked;
+    const plain = $('#menubar-paste-text-plain').switchbutton().data().switchbutton.options.checked;
     e.preventDefault();
+    let dataType;
+
+    if (plain) dataType = 'text/plain';
+    else {
+      for (const item of Array.from(e.clipboardData.items)){
+        if (item.type === 'text/html') dataType = 'text/html';
+        else if (item.type === 'text/plain' && dataType != 'text/html') dataType = 'text/plain';
+      }
+    }
+
+
     for (const [i, item] of Array.from(e.clipboardData.items).entries()){
-
-      if (item.kind === 'string' && item.type === 'text/html'){
+      if (item.type === dataType){
         item.getAsString(function(d){
-          let height = 0, nodeHeight = 0, scrolledHeight = 0;
-          const matchResult = d.match(/\<\!\-\-StartFragment\-\-\>([\s\S]*)\<\!\-\-EndFragment\-\-\>/);
-          const temp_box = document.getElementById('tab-fluid-document-container');
-          let currentPage = self.getThisPage();
-          let currentPageBody = currentPage.querySelector('div[role=page-body]');
-          let currentPageBodyHeight = currentPageBody.clientHeight;
-          temp_box.innerHTML = '';
+          if (autoPaged){
+            let height = 0, nodeHeight = 0, scrolledHeight = 0;
+            const matchResult = d.match(/\<\!\-\-StartFragment\-\-\>([\s\S]*)\<\!\-\-EndFragment\-\-\>/);
+            const temp_box = document.getElementById('tab-fluid-document-container');
+            let currentPage = self.getThisPage();
+            let currentPageBody = currentPage.querySelector('div[role=page-body]');
+            let currentPageBodyHeight = currentPageBody.clientHeight;
+            temp_box.innerHTML = '';
 
-          let frag0 = matchResult?matchResult[1]:matchResult;
-          let frag = frag0.replace(/\bclass\=.+?\b/g, '');
-          frag = frag.replace(/\<\!\-\-\[if gte vml[\s\S]*?\<\!\[endif\]\-\-\>/g, function(a){
-            return '';
-          });
-          frag = frag.replace(/\<\!\[if \!vml\]\>([\s\S]*?)\<\!\[endif\]\>/g, function(a, b){
-            let height = 400;
-            const m = b.match(/img width\=[\d]+ height\=([\d]+)/);
-            if (m) height = m[1];
-            return '<span style="line-height:' + height + 'px;display:block;" role="image-place-holder">插图占位符</span>';
-          })
-          window.docFrag = document.createElement('div');
-          temp_box.innerHTML = (frag);
-          //document.execCommand('insertHTML', false, frag);console.log(frag);
+            let frag0 = matchResult?matchResult[1]:matchResult;
+            let frag = frag0.replace(/\bclass\=.+?\b/g, '');
+            frag = frag.replace(/\<\!\-\-\[if gte vml[\s\S]*?\<\!\[endif\]\-\-\>/g, function(a){
+              return '';
+            });
+            frag = frag.replace(/\<\!\[if \!vml\]\>([\s\S]*?)\<\!\[endif\]\>/g, function(a, b){
+              let height = 400;
+              const m = b.match(/img width\=[\d]+ height\=([\d]+)/);
+              if (m) height = m[1];
+              return '<span style="line-height:' + height + 'px;display:block;" role="image-place-holder">插图占位符</span>';
+            })
+            window.docFrag = document.createElement('div');
+            temp_box.innerHTML = (frag);
+            //document.execCommand('insertHTML', false, frag);console.log(frag);
 
-          for (const node of temp_box.querySelectorAll('*')){
-            if ($.trim(node.innerHTML) === '') node.outerHTML = "&nbsp;"
-          }
-
-          for (const node of Array.from(temp_box.childNodes)){
-            if (node.style){
-              $(node).css('marginLeft', '0px');
-              if (parseFloat($(node).css('marginRight')) < 0) $(node).css('marginRight', '0px');
-              if (parseFloat($(node).css('textIndent')) < 0) $(node).css('textIndent', '0px');
+            for (const node of temp_box.querySelectorAll('*')){
+              if ($.trim(node.innerHTML) === '') node.outerHTML = "&nbsp;"
             }
-            if (node.nodeType === 1) {
-              nodeHeight = (parseFloat($(node).css('marginTop')) + parseFloat($(node).css('marginBottom')) + node.clientHeight)
-              height = (node.offsetTop + node.clientHeight + parseFloat($(node).css('marginBottom'))) - scrolledHeight;
-              if (height > currentPageBodyHeight){
-                scrolledHeight = node.offsetTop;
-                currentPageBody = self.append().newPageBody;
-                $(currentPageBody).append(node.outerHTML);
-              } else {
-                $(currentPageBody).append(node.outerHTML);
+
+            for (const node of Array.from(temp_box.childNodes)){
+              if (node.style){
+                $(node).css('marginLeft', '0px');
+                if (parseFloat($(node).css('marginRight')) < 0) $(node).css('marginRight', '0px');
+                if (parseFloat($(node).css('textIndent')) < 0) $(node).css('textIndent', '0px');
+              }
+              if (node.nodeType === 1) {
+                nodeHeight = (parseFloat($(node).css('marginTop')) + parseFloat($(node).css('marginBottom')) + node.clientHeight)
+                height = (node.offsetTop + node.clientHeight + parseFloat($(node).css('marginBottom'))) - scrolledHeight;
+                if (height > currentPageBodyHeight){
+                  scrolledHeight = node.offsetTop;
+                  currentPageBody = self.append().newPageBody;
+                  $(currentPageBody).append(node.outerHTML);
+                } else {
+                  $(currentPageBody).append(node.outerHTML);
+                }
               }
             }
-          }
 
-          $(self.wrapper).find('span[role=image-place-holder]').each(function(){
-            const width = $(this).width();
-            const height= $(this).height();
-            this.outerHTML = '<img width="' + width + '" height="' + height + '" />';
-            console.log(this);
-          });
+            $(self.wrapper).find('span[role=image-place-holder]').each(function(){
+              const width = $(this).width();
+              const height= $(this).height();
+              this.outerHTML = '<img width="' + width + '" height="' + height + '" />';
+              console.log(this);
+            });
+          }
+          else {
+            document.execCommand('insertHTML', false, d);
+          }
         });
+        break;
       }
 
-      if (item.kind === 'string' && item.type === 'text/plain'){
+      if (item.type === dataType){
         item.getAsString(function(d){
-          //document.execCommand('insertText', false, d)
+          document.execCommand('insertText', false, d)
         });
       }
 
@@ -141,6 +159,9 @@ pagedDoc.prototype.init = function(container, option){
     }
 
   });
+};
+
+pagedDoc.prototype.pasteFromWord = function (e){
 
 };
 
@@ -405,6 +426,8 @@ pagedDoc.prototype.load = function(template){
         newPageHeader.innerHTML = header;
         newPageFooter.innerHTML = footer;
       }
+
+      console.log('Page '+ (i+1) + 'loaded...');
     }
   }
 };

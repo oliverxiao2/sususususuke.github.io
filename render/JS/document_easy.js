@@ -499,17 +499,20 @@ $.fn.tableMergeCells = function () {
 
 
 $(document).ready(function(){
-  //$('.easyui-menu div').bind('selectstart', function(){return false;});
 
   //$('#mm-document').data().menu.options.duration = 1000;
   // ********* menubar ***************************//
+  const menuBarPasteFromWordBtn = $('#menubar-paste-auto-paged');
+
+
   $('#mm-fontSize').click(function(e){
-    const fontSize = e.target.innerText;
+    document.execCommand('fontSize', false, prompt('字号', 1));
+    /*const fontSize = e.target.innerText;
     const el = $.globalStorage.range.commonAncestorContainer;
 
     if (el){
       el.parentNode.style.fontSize = fontSize + 'pt';
-    }
+    }*/
   });
 
   $('#mm-font-line-height').click(function(){
@@ -555,15 +558,15 @@ $(document).ready(function(){
   });
 
   $('#mm-align-left').bind('click', function(){
-    document.execCommand('justifyleft')
+    document.execCommand('justifyleft');
   });
 
   $('#mm-align-center').bind('click', function(){
-    document.execCommand('justifycenter')
+    document.execCommand('justifycenter');
   });
 
   $('#mm-align-right').bind('click', function(){
-    document.execCommand('justifyright')
+    document.execCommand('justifyright');
   });
 
   $('#menubar-edit-insert-horizontal-rule').click(function(){
@@ -687,8 +690,6 @@ $(document).ready(function(){
   $('#w-document-algorithm-btn-run').click(function(){
     setAlgorithmObj();
   });
-
-
 
   function removeTreeNode($tree){
     if ($tree.jquery && $tree[0]){
