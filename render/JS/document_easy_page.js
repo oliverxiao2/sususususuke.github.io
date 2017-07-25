@@ -74,7 +74,7 @@ pagedDoc.prototype.init = function(container, option){
 
     for (const [i, item] of Array.from(e.clipboardData.items).entries()){
       if (item.type === dataType){
-        item.getAsString(function(d){
+        item.getAsString(function(d){console.log(d);
           if (autoPaged){
             let height = 0, nodeHeight = 0, scrolledHeight = 0;
             const matchResult = d.match(/\<\!\-\-StartFragment\-\-\>([\s\S]*)\<\!\-\-EndFragment\-\-\>/);
@@ -96,7 +96,7 @@ pagedDoc.prototype.init = function(container, option){
               return '<span style="line-height:' + height + 'px;display:block;" role="image-place-holder">插图占位符</span>';
             })
             window.docFrag = document.createElement('div');
-            temp_box.innerHTML = (d);
+            temp_box.innerHTML = (frag);
             //document.execCommand('insertHTML', false, frag);console.log(frag);
 
             for (const node of temp_box.querySelectorAll('*')){
