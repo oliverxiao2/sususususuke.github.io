@@ -504,9 +504,17 @@ $(document).ready(function(){
   // ********* menubar ***************************//
   const menuBarPasteFromWordBtn = $('#menubar-paste-auto-paged');
 
-
+  $('#menubar-font-name').children().each(function(){
+    const fontName = this.innerText;
+    $(this).css('fontFamily', fontName);
+  //  this.addEventListener('selectstart', function(){return false;}, false);
+    $(this).click(function(){
+      console.log('clicked');
+      document.execCommand('fontName', false, fontName);
+    });
+  });
   $('#mm-fontSize').click(function(e){
-    document.execCommand('fontSize', false, prompt('字号', 1));
+    document.execCommand('fontSize', false, prompt('字号', 4));
     /*const fontSize = e.target.innerText;
     const el = $.globalStorage.range.commonAncestorContainer;
 
@@ -864,6 +872,100 @@ $(document).ready(function(){
         cobjs._currentLeft = null;
         _document.css("cursor", "auto");
       });
+    });
+  };
+})(jQuery);
+
+(function ($){
+  $.fn.tablefilter = function(){
+    var _document = $('body');
+    $(this).each(function(){
+      var _table = $(this);
+      var trs = _table.find('tr');
+      var ths = trs.first().children();
+      var select = document.createElement('select');
+      var fb = document.createElement('div');
+      var submitBtn = document.createElement('button');
+      var cancelBtn = document.createElement('button');
+
+      select.setAttribute('multiple', 'true');
+      $(select).css('display', 'block').css('width', '100%').css('height', '100%');
+
+      $(fb).css('display', 'none')
+           .css('position', 'absolute')
+           .css('border', '1px solid black')
+           .css('backgroundColor', 'white')
+           .appendTo(_document);
+      submitBtn.innerText = '确认';
+      cancelBtn.innerText = '取消';
+
+      fb.appendChild(submitBtn);
+      fb.appendChild(cancelBtn);
+      fb.appendChild(select);
+
+      $(select)
+           .css('margin', 0)
+           .css('padding', 0);
+
+      ths.contextmenu(function(e){
+        e.preventDefault();
+        const thCellIndex = this.cellIndex;
+        submitBtn.columnIndex = thCellIndex;
+        const valueArray = [];
+        let selectInnerHTML = '';
+        let selected = '';
+        const left = e.clientX, top = e.clientY;
+        trs.each(function(i){
+          if (i > 0){
+            const $tr = $(this);
+            const tds = $tr.children();
+            tds.each(function(){
+              if (this.cellIndex == thCellIndex){
+                if (valueArray.indexOf(this.innerText) === -1) {
+                  valueArray.push(this.innerText);
+
+                  selected = ($tr.css('display') === 'none')?'':'selected';
+                  selectInnerHTML += '<option value="'+ this.innerText+'" '+ selected +'>'+this.innerText+'</option>';
+                }
+              }
+            });
+          }
+        });
+
+        select.innerHTML = selectInnerHTML;
+
+        $(fb).css('display', 'block')
+             .css('left', left)
+            .css('top', top);
+
+        $(select).focus();
+      });
+
+      $(submitBtn).click(function(){
+        $(fb).css('display', 'none');
+        const showThese = [];
+        const columnIndex = this.columnIndex;
+        $(select).children().each(function(){
+          const selected = this.selected;
+          const value = this.value;
+          if (selected) showThese.push(value);
+        });
+
+        trs.each(function(i, tr){
+          const $tr = $(tr);
+          const tds = $(this).children();
+          if (i > 0){
+            const thisValue = tds.get(columnIndex).innerText;
+            if (showThese.indexOf(thisValue) != -1) $tr.css('display', 'table-row');
+            else $tr.css('display', 'none');
+          }
+        });
+      });
+
+      $(cancelBtn).click(function(){
+        $(fb).css('display', 'none');
+      });
+
     });
   };
 })(jQuery);

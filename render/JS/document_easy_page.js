@@ -146,19 +146,6 @@ pagedDoc.prototype.init = function(container, option){
     }
   });
 
-  this.wrapper.addEventListener('keydown', function(e){
-    if (e.code === 'Backspace'){
-      const currentPage = self.getThisPage();
-      if (currentPage){
-        const currentPageBody = currentPage.querySelector('div[role=page-body]');
-        if (currentPageBody.innerText === '') {
-          e.preventDefault();
-          currentPageBody.innerHTML = '<p><br /></p>';
-        }
-      }
-    }
-
-  });
 };
 
 pagedDoc.prototype.pasteFromWord = function (e){
@@ -309,7 +296,7 @@ pagedDoc.prototype.save = function(){
       }
       this.content.charts.push(dataObj);
 
-      pageBodyHTML = pageBodyHTML.replace(chartsOnThisPage[j].outerHTML, '<img role="chartObj" data-chartID=' + dataObj.id + ' src="report_files\/chart'+totalChartIndex+'.png">');
+      pageBodyHTML = pageBodyHTML.replace(chartsOnThisPage[j].outerHTML, '<img role="'+dataObj.type+'" data-chartID=' + dataObj.id + ' src="report_files\/chart'+totalChartIndex+'.png">');
     }
 
     this.content.pageBody.push({
@@ -417,7 +404,7 @@ pagedDoc.prototype.load = function(template){
 
     for (const [i, page] of template.content.pageBody.entries()){
       const {newPage, newPageHeader, newPageBody, newPageFooter} = this.append('end');
-      newPageBody.innerHTML = page.html;
+      let pageBodyHTML = page.html;
 
       if (i === 0) {
         newPageHeader.innerHTML = (hasTitlePage)?(firstHeader?firstHeader:header):header;
@@ -427,6 +414,11 @@ pagedDoc.prototype.load = function(template){
         newPageFooter.innerHTML = footer;
       }
 
+      newPageBody.innerHTML = pageBodyHTML;
+
+      $(newPageBody).find('img').each(function(){
+
+      });
       console.log('Page '+ (i+1) + 'loaded...');
     }
   }
