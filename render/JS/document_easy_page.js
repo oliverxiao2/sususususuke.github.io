@@ -96,7 +96,7 @@ pagedDoc.prototype.init = function(container, option){
               return '<span style="line-height:' + height + 'px;display:block;" role="image-place-holder">插图占位符</span>';
             })
             window.docFrag = document.createElement('div');
-            temp_box.innerHTML = (frag);
+            temp_box.innerHTML = (d);
             //document.execCommand('insertHTML', false, frag);console.log(frag);
 
             for (const node of temp_box.querySelectorAll('*')){
