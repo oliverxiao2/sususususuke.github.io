@@ -793,7 +793,7 @@ line.prototype.bindMDF = function(file, channels){
 
             time_domain  = [min(timeArray), max(timeArray)];
             totalTimeDomain = [min(totalTimeArray), max(totalTimeArray)];
-            if (time_domain[0] === time_domain[1] && time_domain[0] != 0)  time_domain = [time_domain[0]*0.5, time_domain[0]*1.5];
+            if (time_domain[0] === time_domain[1] && time_domain[0] != 0)  time_domain = [time_domain[0]-1, time_domain[0]+1]; // when time_domain[0] is negative, [0.5*i, 1.5*i], -6 => [-3, -9], the order will be wrong
             if (time_domain[0] === time_domain[1] && time_domain[0] === 0) time_domain = [0, 1];
 
             const theConversion = theCNBlock.ccBlock.additionalConversionData;
