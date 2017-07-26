@@ -282,7 +282,7 @@ pagedDoc.prototype.save = function(){
         type: chartsOnThisPage[j].parentChart.type,
       };
 
-      let groupId = 0;
+      let groupId = -1;
       for (const filename in data){
         dataObj.data.windowTimeDomain.push(data[filename].windowTimeDomain)
         for (const group of data[filename].dataGroup){
@@ -429,10 +429,34 @@ pagedDoc.prototype.load = function(template){
           for (const theChart of charts){
             if (theChart.id === chartId){
               const container = this.parentNode;
+              const templateData = theChart.data;
               if (container){
+                // 将img替换为chart对象
                 $(container).empty();
                 const newChart = new chart(container);
                 $.globalStorage.charts.push(newChart);
+                console.log(templateData);
+
+                // 如果找到对应索引的测量文件，则绑定数据并画图
+                for (const channel of templateData.channels){
+
+
+                  // 按照fileId作为索引号，读取$.globalStorage.files中的文件
+                  const importedFiles = $.globalStorage.files;
+                  let importedMDFIndex = -1;
+                  for (const filename in importedFiles){
+                    const file = importedFiles[filename];
+
+                    if (file && file.fileType === 'DAT'){
+                      importedMDFIndex++;
+                      if (importedMDFIndex === channel.fileId){
+                        newChart.plot.bindMDF(file, [channel.shortSignalName], channel.groupId);
+                      }
+                    }
+                  }
+                }
+
+                if (newChart.plot.data) newChart.plot.draw2({niceTimeDomain:true, niceValueDomain:true});
               }
             }
           }

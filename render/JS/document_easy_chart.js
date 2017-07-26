@@ -704,7 +704,7 @@ line.prototype.init = function(){
   this.totalGroupCount = 0;
 };
 
-line.prototype.bindMDF = function(file, channels){
+line.prototype.bindMDF = function(file, channels, groupId){
   // params example
   // channels: ['nmot', 'nmot_w'], ['rl_w'], ['B_ma', 'B_st']
   var self = this;
@@ -750,6 +750,7 @@ line.prototype.bindMDF = function(file, channels){
       };
     }
 
+    console.log(channels);
     const dotsNum = (this.toX - this.fromX)*this.style.sampleRatio;
     const groupCount = arguments.length -1;
     const groupHeight = (this.fromY - this.toY - this.style.groupMargin*(groupCount - 1))/groupCount;
@@ -757,8 +758,8 @@ line.prototype.bindMDF = function(file, channels){
 
     let r, needle, maxSharedTimeDomain; // 注意后面的子函数用了maxSharedTimeDomain变量，必须使用var声明
 
-    for (var i = 1; i < arguments.length; i++){
-      needle = arguments[i];
+    for (var i = 0; i < channels.length; i++){
+      needle = channels[i];
 
       if (needle.constructor.name === 'Array') {
         // 同组内的通道共享y轴
@@ -793,7 +794,7 @@ line.prototype.bindMDF = function(file, channels){
 
             time_domain  = [min(timeArray), max(timeArray)];
             totalTimeDomain = [min(totalTimeArray), max(totalTimeArray)];
-            if (time_domain[0] === time_domain[1] && time_domain[0] != 0)  time_domain = [time_domain[0]-1, time_domain[0]+1]; // when time_domain[0] is negative, [0.5*i, 1.5*i], -6 => [-3, -9], the order will be wrong
+            if (time_domain[0] === time_domain[1] && time_domain[0] != 0)  time_domain = [time_domain[0]-1, time_domain[0]+1];
             if (time_domain[0] === time_domain[1] && time_domain[0] === 0) time_domain = [0, 1];
 
             const theConversion = theCNBlock.ccBlock.additionalConversionData;
@@ -803,7 +804,7 @@ line.prototype.bindMDF = function(file, channels){
               theGroup.fixedHeight = this.style.bitGroupFixedHeight;
             } else {
               value_domain = [min(valueArray), max(valueArray)];
-              if (value_domain[0] === value_domain[1] && value_domain[0] != 0)  value_domain = [value_domain[0]*0.5, value_domain[0]*1.5];
+              if (value_domain[0] === value_domain[1] && value_domain[0] != 0)  value_domain = [value_domain[0]-1, value_domain[0]+1];// when value_domain[0] is negative, [0.5*i, 1.5*i], -6 => [-3, -9], the order will be wrong
               if (value_domain[0] === value_domain[1] && value_domain[0] === 0) value_domain = [-1, 1];
             }
 
@@ -842,8 +843,8 @@ line.prototype.bindMDF = function(file, channels){
           // maybe there are more than one file. Here can't know the total group count.
           //theGroup.fromY = groupHeight - this.style.strokeWidth/2;
           //theGroup.toY = this.style.strokeWidth/2;
-
-          this.data[fileUID].dataGroup.push(theGroup);
+          if (groupId) this.data[fileUID].dataGroup[groupId] = theGroup;
+          else this.data[fileUID].dataGroup.push(theGroup);
           this.totalGroupCount += 1;
         }
 
