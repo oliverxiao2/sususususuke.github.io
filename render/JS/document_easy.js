@@ -22,6 +22,7 @@ $.globalStorage = {
           text: '<a onclick="$($(\'#tab-document\').children()[0]).scrollTo($(\'#'+page.pageId+'\'), 400)">第'+(i+1)+'页<a>',
         });
       }
+      
       for (const [i, chart] of content.charts.entries()){
         chartTreeData.push({
           text: '<a onclick="$($(\'#tab-document\').children()[0]).scrollTo($(\'#'+chart.id+'\'), 400)">'+(chart.title?chart.title:'插图'+(i+1))+'<a>',

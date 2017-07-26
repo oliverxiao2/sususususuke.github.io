@@ -260,43 +260,49 @@ pagedDoc.prototype.save = function(){
       this.content.headerFooter.footer = page.find('div[role=page-footer]:first').html();
     }
 
+    // 统计整个文档中引用了多少测量文件
+
     const chartsOnThisPage = pageBody.find('div[name=wrapper-chart]');
+    const MDFFilenameArray = [];
+    let width = 0, height = 0;
     for (let j = 0; j < chartsOnThisPage.length; j++){
       totalChartIndex++;
+      width = chartsOnThisPage[j].clientWidth;
+      height = chartsOnThisPage[j].clientHeight;
       const data = chartsOnThisPage[j].parentChart.plot.data;
       const theChartBase64 = exportAllCanvas(chartsOnThisPage[j]).substr(22);
       const dataObj = {
         //base64: theChartBase64,
         chartIndex: totalChartIndex,
         id: chartsOnThisPage[j].id,
-        data: {},
+        data: {
+          channels: [],
+          windowTimeDomain: [],
+        },
         type: chartsOnThisPage[j].parentChart.type,
       };
 
+      let groupId = 0;
       for (const filename in data){
-        dataObj.data[filename] = {
-          windowTimeDomain: data[filename].windowTimeDomain,
-          dataGroup:[],
-        };
+        dataObj.data.windowTimeDomain.push(data[filename].windowTimeDomain)
         for (const group of data[filename].dataGroup){
-          let theGroup = {
-            bitGroup: group.bitGroup,
-            fixedHeight: group.fixedHeight,
-            groupValueDomain: group.groupValueDomain,
-            channels: [],
-          };
+          groupId++;
+
           for (const ch of group.channels){
-            theGroup.channels.push({
-              cursor: ch.cursor,
-              name: ch.name,
+            if (MDFFilenameArray.indexOf(filename) === -1) MDFFilenameArray.push(filename);
+            dataObj.data.channels.push({
+              groupId: groupId,
+              fileId: MDFFilenameArray.indexOf(filename),
+              filename: filename,
+              isBit: group.bitGroup,
+              shortSignalName: ch.name,
             });
           }
-          dataObj.data[filename].dataGroup.push(theGroup);
         }
       }
       this.content.charts.push(dataObj);
 
-      pageBodyHTML = pageBodyHTML.replace(chartsOnThisPage[j].outerHTML, '<img role="'+dataObj.type+'" data-chartID=' + dataObj.id + ' src="report_files\/chart'+totalChartIndex+'.png">');
+      pageBodyHTML = pageBodyHTML.replace(chartsOnThisPage[j].outerHTML, '<img width='+width+' height='+height+' role="'+dataObj.type+'" data-chartID=' + dataObj.id + ' src="report_files\/chart'+totalChartIndex+'.png">');
     }
 
     this.content.pageBody.push({
@@ -398,7 +404,7 @@ pagedDoc.prototype.load = function(template){
   if (template.setting && template.content){
     $(this.wrapper).empty();
     this.setting = template.setting;
-
+    const charts = template.content.charts;
     const hasTitlePage = template.setting.hasTitlePage;
     const {firstHeader, firstFooter, header, footer} = template.content.headerFooter;
 
@@ -417,9 +423,23 @@ pagedDoc.prototype.load = function(template){
       newPageBody.innerHTML = pageBodyHTML;
 
       $(newPageBody).find('img').each(function(){
+        const chartId = $(this).attr('data-chartID');console.log(chartId);
+
+        if (chartId){
+          for (const theChart of charts){
+            if (theChart.id === chartId){
+              const container = this.parentNode;
+              if (container){
+                $(container).empty();
+                const newChart = new chart(container);
+                $.globalStorage.charts.push(newChart);
+              }
+            }
+          }
+        }
 
       });
-      console.log('Page '+ (i+1) + 'loaded...');
+      console.log('Page '+ (i+1) + ' loaded...');
     }
   }
 };
