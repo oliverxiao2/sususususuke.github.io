@@ -8,7 +8,7 @@ window.pagedDoc = function(container, option){
     const pagedDocStyle = document.createElement('style');
     pagedDocStyle.innerHTML = `
     .page-shadow{box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.4);}
-    .doc-page{overflow: hidden; font-family: "Segoe UI", "宋体"; font-size: 14pt;}
+    .doc-page{overflow: hidden; font-family: "Arial", "宋体"; font-size: 10pt;}
     .doc-page ul, .doc-page ol{padding-left:1em;}
     .doc-page-body{border-top: 1px dashed #999; border-bottom: 1px dashed #999;}
     .doc-page-header, .doc-page-footer{background: whitesmoke;opacity: 0.5;}
@@ -108,6 +108,7 @@ pagedDoc.prototype.init = function(container, option){
                 $(node).css('marginLeft', '0px');
                 if (parseFloat($(node).css('marginRight')) < 0) $(node).css('marginRight', '0px');
                 if (parseFloat($(node).css('textIndent')) < 0) $(node).css('textIndent', '0px');
+                if ($(node).get(0).tagName === 'P'){$(node).css('marginTop', '13px').css('marginBottom', '13px')}
               }
               if (node.nodeType === 1) {
                 nodeHeight = (parseFloat($(node).css('marginTop')) + parseFloat($(node).css('marginBottom')) + node.clientHeight)
@@ -482,8 +483,8 @@ Content-Type: text/html; charset="utf-8"
 <xml><w:WordDocument><w:View>Print</w:View><w:Zoom>100</w:Zoom><w:DoNotOptimizeForBrowser/></w:WordDocument></xml>
 <style>
 body {
-font-family: "Segoe UI", "宋体";
-font-size: 12pt;
+font-family: "Arial", "宋体";
+font-size: 10pt;
 }
 ul{padding-left:1em;}
 ol{padding-left:1em;}

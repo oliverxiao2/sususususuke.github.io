@@ -279,7 +279,7 @@ $('#mm-document-create-chart').click(function () {
 
         const wrapper = document.createElement('div');
         wrapper.style.width = '100%';
-        wrapper.style.height = '400px';//prompt('图表高度', '30%')';
+        wrapper.style.height = prompt('图表高度', '30%');
         wrapper.style.padding = 0;
         wrapper.style.margin = 0;
         wrapper.style.display = 'block';
@@ -576,6 +576,14 @@ $(document).ready(function(){
 
   $('#mm-align-right').bind('click', function(){
     document.execCommand('justifyright');
+  });
+
+  $('#mm-indent').click(function(){
+    document.execCommand('indent');
+  });
+
+  $('#mm-outdent').click(function(){
+    document.execCommand('outdent');
   });
 
   $('#menubar-edit-insert-horizontal-rule').click(function(){
