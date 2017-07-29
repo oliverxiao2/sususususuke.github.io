@@ -1,4 +1,5 @@
-# 折线图 元素的样式计算规则
+# 折线图 
+## 元素的样式计算规则
 
 - 一个完整的折线图包含以下元素
   - 标题（可选，目前默认不显示）
@@ -24,3 +25,17 @@
  - 固定游标
   - 当按住alt键，鼠标在主绘图区移动时，浮动游标会显示当前位置的所有通道的值。这时单击鼠标，会在当前鼠标位置留下一条固定游标。
 
+## 方法
+- addData(mdf, ['channelname 1', ..., 'channelname n'])
+  addData(mdf, ['channelname 1', ..., 'channelname n'])：添加n个通道
+  
+- loadData(mdf), loadData(mdf, ['channelname 1', ... , 'channelname n'])
+  loadData(mdf): 如果已经有通道绑定，则沿用绑定的通道分组，并将具体的数组数据替换成新的mdf文件中的对应的数据，并返回true；若没有绑定通道，则返回
+  false。如果在新的mdf文件中找不到之前已经绑定的通道,保留该通道，但是将该通道的图例的名称颜色标红。
+  loadData(mdf, ['channelname 1', ... , 'channelname n']): 将绑定的数据完全替换成新文件mdf中的新通道
+
+- draw(options)
+  options成员：
+  multiY: false/true, 同一个通道组是显示一个y轴还是显示多个y轴
+  
+  
