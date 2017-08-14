@@ -19,6 +19,7 @@ var Figure = function(parent, type, options){
 		axisRightFixedWidth: 70,
 		axisTopHeight: 12,
 		fluidGroupMargin: 12,
+		floatDigit: 3,
 	}
 
 	const me = this;
@@ -43,6 +44,9 @@ var Figure = function(parent, type, options){
 		groups: [],
 		bitGroup: [],
 	};
+
+	this.bgLayer = null;
+
 
 	this.resetLayout = function () {
 		this.axis.axisBottom.configs = [];
@@ -78,25 +82,23 @@ var Figure = function(parent, type, options){
 	let _contextmenuhtml = `
 		<div id="figure-contextmenu-`+ me.id +`" class="easyui-menu" style="width:200px;">
 			<div id="figure-contextmenu-fileInput-`+ me.id +`">关联文件</div>
-			<div id="figure-contextmenu-addData">添加通道</div>
-			<div id="figure-contextmenu-exit">退出</div>
+			<div id="figure-contextmenu-addData-`+ me.id +`">添加通道</div>
+			<div id="figure-contextmenu-props-`+ me.id +`">属性</div>
+			<div id="figure-contextmenu-exit-`+ me.id +`">退出</div>
 		</div>
 	`;
 	$(wrapper).append(_contextmenuhtml);
 
 	$('#figure-contextmenu-fileInput-'+me.id).click(function () { fileInput.click(); })
 	
-	$('#figure-contextmenu-addData').click(function () { addDataBtnClickHandler(); });
-	$('#figure-contextmenu-exit').click(function () {
-		const img = me.parentWrapper.parent.img;
-		img.style.width = '';
-		img.style.height = '';
+	$('#figure-contextmenu-addData-'+me.id).click(function () { addDataBtnClickHandler(); });
+
+	$('#figure-contextmenu-props-'+me.id).click(function () {  });
+
+	$('#figure-contextmenu-exit-'+me.id).click(function () {
+		const img = me.rootParent.img;
 		img.src = me.export();
-		//img.style.transform = 'scale(0.5)';
-		console.log(img.clientWidth, img.clientHeight, me.width, me.height);
-		me.parentWrapper.style.display = 'none';
-
-
+		$(me.rootParent.fullScreenWrapper).fadeOut();
 	});
 	// ========================================================
 
@@ -119,7 +121,6 @@ var Figure = function(parent, type, options){
 		axisTopCollection: [],
 		legendTable: [],
 	};*/
-	console.log(this.width, $(wrapper).width(), wrapper.clientWidth, parent.clientWidth);
 
 	function mousedownHandler (e) {
 		const x = e.offsetX, y = e.offsetY;
@@ -127,7 +128,10 @@ var Figure = function(parent, type, options){
 
 		if (e.buttons != 1 || !where) return false;
 
-		if (where.type === 'group') {
+		const _type = where.type;
+		me.actionTargetType = _type;
+
+		if (_type === 'group' || _type === 'axisLeft' || _type === 'axisBottom') {
 			if (me.state === 'idle' && (!e.altKey) && (!e.shiftKey) && (!e.ctrlKey) ) {
 				// 进入平移状态
 				me.state = 'pan';				
@@ -136,7 +140,7 @@ var Figure = function(parent, type, options){
 			}
 		}
 
-		if (where.type === 'legendTableItem') {
+		else if (_type === 'legendTableItem') {
 			const focusedChannel = where.target;
 
 			for (const theChannel of me.legendTable.setting.channels) {
@@ -157,7 +161,7 @@ var Figure = function(parent, type, options){
 
 	// 注意这里的平移和缩放逻辑有问题，未来可能会出现一个组内绘制多个文件的通道的情况
 	function mousemoveHandler (e) {
-		if (me.state === 'pan') {
+		if (me.state === 'pan' && me.actionTargetType === 'group') {
 			// 平移也分为x轴平移、y轴平移和任意平移
 			const group = me.actionTarget;
 			const axisBottom = group.channels[0].xAxis;
@@ -166,11 +170,8 @@ var Figure = function(parent, type, options){
 			const rangeX = axisBottom.setting.xEnd - axisBottom.setting.xStart;
 			const rangeY = group.axisLeftCollection[0].setting.yStart - group.axisLeftCollection[0].setting.yEnd;
 
-			const offsetX = e.offsetX,
-				  offsetY = e.offsetY;
-
 			// 必须给定精度，否则javascript的数字特性会导致1 = 1.0000000000000001
-			const domainOffsetX = parseFloat((e.movementX * (domainXMax - domainXMin) / rangeX).toFixed(3));
+			const domainOffsetX = (e.movementX * (domainXMax - domainXMin) / rangeX).toDigit();
 			let domainOffsetY;
 
 			// 检测没有按下shift键，y方向可以平移 //****应该用group.axisLeftCollection
@@ -178,8 +179,8 @@ var Figure = function(parent, type, options){
 				let axisLeftDomain;
 				for (const channel of group.channels) {
 					axisLeftDomain = channel.yAxis.setting.domain;					
-					domainOffsetY  = parseFloat((e.movementY * (axisLeftDomain[1] - axisLeftDomain[0]) / rangeY).toFixed(3));
-					channel.yAxis.setting.domain = [axisLeftDomain[0] + domainOffsetY, axisLeftDomain[1] + domainOffsetY];
+					domainOffsetY  = (e.movementY * (axisLeftDomain[1] - axisLeftDomain[0]) / rangeY).toDigit();
+					channel.yAxis.setting.domain = [(axisLeftDomain[0] + domainOffsetY).toDigit(), (axisLeftDomain[1] + domainOffsetY).toDigit()];
 					channel.yAxis.setting.domainMode = 'original';
 					channel.yAxis.clearAll();
 					channel.yAxis.draw();
@@ -188,11 +189,48 @@ var Figure = function(parent, type, options){
 
 			// 检测没有按下alt键，x方向可以平移
 			if (!e.altKey) {
-				axisBottom.setting.domain = [domainXMin - domainOffsetX, domainXMax - domainOffsetX];
+				axisBottom.setting.domain = [(domainXMin - domainOffsetX).toDigit(), (domainXMax - domainOffsetX).toDigit()];
 				axisBottom.setting.domainMode = 'original';
 				axisBottom.clearAll();
 				axisBottom.draw();
 			}
+
+			for (const channel of axisBottom.setting.channels) {
+				channel.plot.clearAll();
+				channel.plot.draw(channel);
+			}
+		}
+
+		else if (me.state === 'pan' && me.actionTargetType === 'axisLeft') {
+			const axisLeft = me.actionTarget;
+			const range = axisLeft.setting.yStart - axisLeft.setting.yEnd;
+			const [dMin, dMax] = axisLeft.setting.domain;
+			const domainOffset = (e.movementY * (dMax - dMin) / range).toDigit();
+
+			axisLeft.setting.domain = [(dMin + domainOffset).toDigit(), (dMax + domainOffset).toDigit()];
+			axisLeft.setting.domainMode = 'original';
+			axisLeft.clearAll();
+			axisLeft.draw();
+
+			const channels = axisLeft.setting.channels;
+
+			for (const channel of channels) {
+				channel.plot.clearAll();
+				channel.plot.draw(channel);
+			}
+		}
+
+		else if (me.state === 'pan' && me.actionTargetType === 'axisBottom') {
+			const axisBottom = me.actionTarget;
+
+			const [domainXMin, domainXMax] = axisBottom.setting.domain;
+			const rangeX = axisBottom.setting.xEnd - axisBottom.setting.xStart;
+			const domainOffsetX = (e.movementX * (domainXMax - domainXMin) / rangeX).toDigit();
+
+			axisBottom.setting.domain = [(domainXMin - domainOffsetX).toDigit(), (domainXMax - domainOffsetX).toDigit()];
+			axisBottom.setting.domainMode = 'original';
+			axisBottom.clearAll();
+			axisBottom.draw();
 
 			for (const channel of axisBottom.setting.channels) {
 				channel.plot.clearAll();
@@ -253,8 +291,43 @@ var Figure = function(parent, type, options){
 			for (const channel of axisBottom.setting.channels) {
 				channel.plot.clearAll();
 				channel.plot.draw();
-			}
+			}			
+		}
+
+		else if (where.type === 'axisLeft') {
+			const axisLeft = where.target;
+
+			let scaleRatio;
+			if (e.deltaY > 0) scaleRatio = 0.8;
+			else scaleRatio = 1.25;
 			
+			const y = e.offsetY;
+			const [y0, y1] = axisLeft.setting.domain;
+			const [range0, range1] = [axisLeft.setting.yStart, axisLeft.setting.yEnd];
+			const k = (y - range0 - 1) / (range1 - y + 1);
+			const y0_new = y0 + (y1 - y0)*(scaleRatio-1)*k/scaleRatio/(1+k);
+			const y1_new = y1 - (y1 - y0)*(scaleRatio-1)/scaleRatio/(1+k);
+
+			axisLeft.setting.domain = [y0_new, y1_new];
+			axisLeft.setting.domainMode = 'original';
+			axisLeft.clearAll();
+			axisLeft.draw();
+
+			for (const channel of axisLeft.setting.channels) {
+				channel.plot.clearAll();
+				channel.plot.draw();	
+			}
+		}
+
+		else if (where.type === 'axisBottom') {
+			const axisBottom = where.target;
+
+			transformLinearAxis('scale', axisBottom, e);
+
+			for (const channel of axisBottom.setting.channels) {
+				channel.plot.clearAll();
+				channel.plot.draw();
+			}
 		}
 	};
 
@@ -281,8 +354,36 @@ var Figure = function(parent, type, options){
 		const mdfs = me.data.mdfs;
 		const latestMDF = mdfs[mdfs.length - 1];
 		me.addData(latestMDF, ['nmot_w', 'rl_w', 'B_st']);
-		me.draw();
+		me.draw({action: 'rebuild'});
 	};
+
+	function transformLinearAxis (type, axis, event) {
+		if (!type || !axis || !event) return false;
+		if (type === 'scale') {
+			let scaleRatio;
+			if (event.deltaY > 0) scaleRatio = 0.8;
+			else scaleRatio = 1.25;
+
+			let _xy,
+				_pos = axis.setting.position;
+			if (_pos === 'Left' || _pos === 'Right') _xy = event.offsetY;
+			else if (_pos === 'Bottom' || _pos === 'Top') _xy = event.offsetX;
+
+			const [d0, d1] = axis.setting.domain;
+			const [range0, range1] = axis.setting.range;
+			const k = (_xy - range0 - 1) / (range1 - _xy + 1);
+			const d0_new = d0 + (d1 - d0)*(scaleRatio-1)*k/scaleRatio/(1+k);
+			const d1_new = d1 - (d1 - d0)*(scaleRatio-1)/scaleRatio/(1+k);
+
+			axis.setting.domain = [d0_new, d1_new];
+			axis.setting.domainMode = 'original';
+			axis.clearAll();
+			axis.draw();
+		}
+
+		else if (type === 'pan') {
+		}
+	}
 };
 
 Figure.prototype.whereFocused = function (x, y) {
@@ -374,7 +475,9 @@ function getChannelsSharedDomain(channels, xy='x') {
 }
 
 Number.prototype.toDigit = function (digit=3) {
-	let string = this.toFixed(digit);
+	return parseFloat(this.toFixed(digit));
+	/*let string = this.toFixed(digit);
+	
 	const m = string.length;
 	for (let i=0; i<digit; i++) {
 		if (string[m-1-i] === '0') string = string.substring(0, m-1-i);
@@ -383,7 +486,7 @@ Number.prototype.toDigit = function (digit=3) {
 
 	const n = string.length;
 	if (string[n-1] === '.') string = string.substring(0, n-1);
-	return string; 
+	return string; */
 }
 
 Figure.extent = function (numArray) {

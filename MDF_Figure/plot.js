@@ -6,11 +6,12 @@ Figure.prototype.addPlot = function(options) {
 		lineWidth: 1.5,
 		lineJoin: 'square',
 		lineCap: 'butt',
-		sampleRatio: 5,
+		sampleRatio: 1,
 	};
 
 	var parentWrapper = this.wrapper;
 	var canvas = document.createElement('canvas');
+	canvas.setAttribute('data-element-type', 'plot');
 	canvas.figureElementType = 'plot';
 	canvas.parent = this;
 

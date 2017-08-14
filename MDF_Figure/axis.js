@@ -74,8 +74,8 @@ Figure.prototype.addAxis = function(options){
 	canvas.setting.subTicks = [];
 	canvas.setting.axisWidth = 0;
 	canvas.setting.axisHeight = 0;
-
 	canvas.setting = Object.assign(canvas.setting, canvas.defaultSetting, options);
+	canvas.setAttribute('data-element-type', 'axis'+canvas.setting.position);
 	canvas.parent = this;
 
 	parentWrapper.appendChild(canvas);
@@ -391,6 +391,14 @@ Figure.prototype.addAxis = function(options){
 	Object.defineProperty(canvas.setting, 'axisWidth', {
 		get: function () {
 			return (this.fontWidth || 120) + this.tickSize + this.fontMarginLeft + this.fontMarginRight + this.marginTop + this.marginBottom + this.spineWidth;
+		},
+	});
+
+	Object.defineProperty(canvas.setting, 'range', {
+		get: function () {
+			const _p = this.position;
+			if (_p === 'Left' || _p === 'Right') return [this.yStart, this.yEnd];
+			if (_p === 'Bottom' || _p === 'Top') return [this.xStart, this.xEnd];
 		},
 	});
 

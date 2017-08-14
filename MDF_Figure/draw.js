@@ -1,5 +1,5 @@
 Figure.prototype.draw = function(options){
-	console.time('rebuild');
+
 	var defaultStyle = {
 		// 绘图动作
 		// 'rebuild': canvasElement删除重建,意味着画布尺寸被修改，需要重建canvas 
@@ -14,14 +14,13 @@ Figure.prototype.draw = function(options){
 
 	let channels = this.data.channels;
 
-	initBgLayer(this);
-
 	if (this.setting.action === 'rebuild' && this.setting.mode === 'multiY' && this.setting.shareYAxisMode === 'signal') {
 
 		// 清除所有轴，包括数据和canvas
+		rebuildBgLayer(this);
 		clearAxisCollection(this);
 		clearPlotCollection(this);
-		clearBgLayer(this);
+		clearLegendTable(this);		
 
 		let groups = [], bitGroup = [];
 		let groupCount = 0, axisLeftCountInOneGroupMax = 0, axisRightCountInOneGroupMax = 0, axisBottomCount = 0;
@@ -143,17 +142,20 @@ Figure.prototype.draw = function(options){
 		}
 
 		// 画bitGroup的border
-		let _yEndBitGroup = this.height - totalAxisBottomHeight - bitGroupHeight;
-		let _yStartBitGroup = this.height - totalAxisBottomHeight;
-		bgLayerCtx.beginPath();
-		bgLayerCtx.lineWidth = this.axisCollection.axisBottomCollection[0].setting.spineWidth;
-		bgLayerCtx.strokeStyle = this.axisCollection.axisBottomCollection[0].setting.spineColor;
-		bgLayerCtx.moveToS(_xStart, _yStartBitGroup);
-		bgLayerCtx.lineToS(_xEnd, _yStartBitGroup);
-		bgLayerCtx.lineToS(_xEnd, _yEndBitGroup);
-		bgLayerCtx.lineToS(_xStart, _yEndBitGroup);
-		bgLayerCtx.lineToS(_xStart, _yStartBitGroup);
-		bgLayerCtx.stroke();
+		if (this.axisCollection.axisBottomCollection[0]) {
+			let _yEndBitGroup = this.height - totalAxisBottomHeight - bitGroupHeight;
+			let _yStartBitGroup = this.height - totalAxisBottomHeight;
+			bgLayerCtx.beginPath();
+			bgLayerCtx.lineWidth = this.axisCollection.axisBottomCollection[0].setting.spineWidth;
+			bgLayerCtx.strokeStyle = this.axisCollection.axisBottomCollection[0].setting.spineColor;
+			bgLayerCtx.moveToS(_xStart, _yStartBitGroup);
+			bgLayerCtx.lineToS(_xEnd, _yStartBitGroup);
+			bgLayerCtx.lineToS(_xEnd, _yEndBitGroup);
+			bgLayerCtx.lineToS(_xStart, _yEndBitGroup);
+			bgLayerCtx.lineToS(_xStart, _yStartBitGroup);
+			bgLayerCtx.stroke();	
+		}
+		
 
 		
 		// 画plot
@@ -172,16 +174,9 @@ Figure.prototype.draw = function(options){
 		this.legendTable = this.addLegendTable();
 		this.legendTable.draw();
 	}
-	console.timeEnd('rebuild');
 
-	function initBgLayer (fig) {
-		const bgLayer = document.createElement('canvas');
-		bgLayer.width = fig.width;
-		bgLayer.height= fig.height;
-		bgLayer.setAttribute('data-element-type', 'bgLayer');
-		bgLayer.style.position = 'absolute';
-		fig.wrapper.appendChild(bgLayer);
-		fig.bgLayer = bgLayer;
+	else if (this.setting.action === 'reshape') {
+		
 	}
 
 	function refreshLayout (fig, options) {
@@ -481,8 +476,15 @@ Figure.prototype.draw = function(options){
 		fig.plotCollection = [];
 	}
 
-	function clearBgLayer (fig) {
-		fig.bgLayer.getContext('2d').clearRect(0, 0, fig.bgLayer.width, fig.bgLayer.height);
+	function clearLegendTable (fig) {
+		const _legend = fig.legendTable;
+		if (_legend) _legend.remove();
+		fig.legendTable = null;
+	}
+
+	function rebuildBgLayer (fig) {
+		if (fig.bgLayer) {fig.bgLayer.remove(); fig.bgLayer = null;}
+		fig.initBgLayer();
 	}
 
 	function extendDomain(d1, d2) {
