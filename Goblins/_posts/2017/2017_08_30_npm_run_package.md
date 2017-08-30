@@ -30,3 +30,6 @@
 }
 ```
 version 版本号不可用X.X的格式，例如使用2.0，就会报错
+
+asar 压缩resources
+packge完成后，进入[packageAPP]/resources目录，运行asar pack ./app app.asar 命令即可
