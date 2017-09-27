@@ -300,6 +300,33 @@ $('#mm-document-create-chart').click(function () {
     }
 });
 
+$('#mm-document-create-chart-type-B').click(function () {
+    if ($.globalStorage.range){
+        const range = $.globalStorage.range;
+
+        const wrapper = document.createElement('div');
+        wrapper.style.width = '100%';
+        wrapper.style.height = prompt('图表高度', '30%');
+        wrapper.style.padding = 0;
+        wrapper.style.margin = 0;
+        wrapper.style.display = 'block';
+        wrapper.style.position = 'relative';
+
+        const before = document.createElement('div');
+        before.innerHTML = '&nbsp;';
+        range.insertNode(before);
+
+        range.insertNode(wrapper);
+        $.globalStorage.charts.push(new FIGURE(wrapper, 'line'));
+
+        const after = document.createElement('div');
+        after.innerHTML = '&nbsp;'
+        range.insertNode(after);
+
+        $.globalStorage.pagedDoc.save();
+    }
+});
+
 $('#mm-document-chart-data').click(function(){
     $('#w-document-chart-data').window('open');
     $.globalStorage.broadcastUpdateChartDataTree('w-document-chart-tree');
@@ -324,6 +351,12 @@ $('#w-document-chart-data-btn-update').click(function(){
         const file = $.globalStorage.selectedFileExplorerFile;
         const filename = $.globalStorage.selectedFileExplorerNode;
         if (activeChart && file){
+          // 清空之前的绘图内容
+          activeChart.plot.data = {};
+          activeChart.layerOfPlot.querySelectorAll('canvas[role=plot-group]').forEach(function(element){
+            element.remove();
+          });
+
           if( eval('activeChart.plot.bindMDF($.globalStorage.selectedFileExplorerFile, [' + str + '] )') ){
             if (activeChart.plot.draw2({niceTimeDomain:true, niceValueDomain: true,})){
               let hasAlready = false;

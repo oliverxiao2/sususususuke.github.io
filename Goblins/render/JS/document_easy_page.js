@@ -347,11 +347,6 @@ pagedDoc.prototype.export = function(type='word'){
     let bodyHTML, fh1, h1, ff1, f1;
     bodyHTML = fh1 = h1 = ff1 = f1 = '';
 
-    for (let i = 0; i < pages.length  - 1; i++){
-      bodyHTML += pages[i].html + '\n' + '<br clear=all style="mso-special-character:line-break;page-break-before:always">' + '\n';
-    }
-    bodyHTML += pages[pages.length-1].html;
-
     if (this.setting.hasTitlePage){
       fh1 = '<div style="mso-element:header;" id="fh1">'+ this.content.headerFooter.firstHeader + '</div>';
       ff1 = '<div style="mso-element:footer;" id="ff1">'+ this.content.headerFooter.firstFooter + '</div>';
@@ -359,6 +354,13 @@ pagedDoc.prototype.export = function(type='word'){
 
     h1 = '<div style="mso-element:header;" id="h1">' + this.content.headerFooter.header + '</div>';
     f1 = '<div style="mso-element:footer;" id="f1">' + this.content.headerFooter.footer + '</div>';
+
+    for (let i = 0; i < pages.length  - 1; i++){
+      bodyHTML += pages[i].html + '\n' + '<br clear=all style="mso-special-character:line-break;page-break-before:always">' + '\n';
+    }
+    bodyHTML += pages[pages.length-1].html;
+
+    
 
     let imageHTML = '';
     const charts = this.content.charts;
@@ -382,10 +384,16 @@ pagedDoc.prototype.export = function(type='word'){
                  .replace('{{$firstFooter$}}', ff1)
                  .replace('{{$generalHeader$}}', h1)
                  .replace('{{$generalFooter$}}', f1)
-                 .replace('{{$images$}}', imageHTML);
+                 .replace('{{$images$}}', imageHTML)
+                 .replace(/{PAGE}/g, `
+                  <!--[if supportFields]><span lang=EN-US>
+                  <span style='mso-element:field-begin'></span>PAGE<span style='mso-element:field-separator'></span></span><![endif]--><span
+                  style='mso-ansi-language:ZH-CN;mso-no-proof:yes'>1</span><!--[if supportFields]><span
+                  lang=EN-US><span style='mso-element:field-end'></span></span><![endif]-->
+                  `)
 
     if (saveAs){
-      saveAs(new Blob([MHTML], {type:"text/html; charset=utf-8"}), 'Report.doc');
+      saveAs(new Blob([MHTML], {type:"text/html; charset=utf-8"}), 'report.doc');
     }
   }
   else if (type === 'json'){
@@ -451,7 +459,7 @@ pagedDoc.prototype.load = function(template){
                     if (file && file.fileType === 'DAT'){
                       importedMDFIndex++;
                       if (importedMDFIndex === channel.fileId){
-                        newChart.plot.bindMDF(file, [channel.shortSignalName], channel.groupId);
+                        newChart.plot.bindMDF(file, [[channel.shortSignalName]], channel.groupId);
                       }
                     }
                   }

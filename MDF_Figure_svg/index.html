@@ -1,0 +1,32 @@
+<html>
+<head>
+	<meta charset="utf-8">
+	<link rel="stylesheet" type="text/css" href="easyui/CSS/easyui.css">
+</head>
+<body style="padding: 0;margin: 0;width: 100%; height:100%;">
+	<div style="width: 680px; height: 350px;" id="div1"></div>
+	<div style="width: 680px; height: 350px;" id="div2"></div>
+</body>
+<script type="text/javascript" src="easyui/jquery-3.2.0.min.js"></script>
+<script type="text/javascript" src="easyui/jquery.easyui.min.js"></script>
+<script type="text/javascript" src="d3.v4.min.js"></script>
+<script type="text/javascript" src="MDF.0.9.js"></script>
+<script type="text/javascript" src="FIGURE.class.js"></script>
+<script type="text/javascript" src="Figure.js"></script>
+<script type="text/javascript" src="axis.js"></script>
+<script type="text/javascript" src="addData.js"></script>
+<script type="text/javascript" src="loadData.js"></script>
+<script type="text/javascript" src="draw.js"></script>
+<script type="text/javascript" src="plot.js"></script>
+<script type="text/javascript" src="initBgLayer.js"></script>
+<script type="text/javascript" src="legendTable.js"></script>
+<script type="text/javascript" src="export.js"></script>
+<script type="text/javascript">	
+	var div1 = document.getElementById('div1');
+	var fig1 = new Figure(div1, 'line');
+
+	var div2 = document.getElementById('div2');
+	var fig2 = new FIGURE(div2, 'line');
+</script>
+<svg width="1358" height="698" data-element-type="axisLeft" style="/* position: absolute; *//* width: 800; */display: block;/* height: 698; */"><g transform="translate(140, 100)" fill="none" font-size="15" font-family="sans-serif" text-anchor="end"><path class="domain" stroke="#000" d="M-6,627.5H0.5V12.5H-6"></path><g class="tick" opacity="1" transform="translate(0,596.25)"><line stroke="#000" x2="-6" y1="0.5" y2="0.5"></line><text fill="#000" x="-9" y="0.5" dy="0.32em">-1,000</text></g><g class="tick" opacity="1" transform="translate(0,519.375)"><line stroke="#000" x2="-6" y1="0.5" y2="0.5"></line><text fill="#000" x="-9" y="0.5" dy="0.32em">-500</text></g><g class="tick" opacity="1" transform="translate(0,442.5)"><line stroke="#000" x2="-6" y1="0.5" y2="0.5"></line><text fill="#000" x="-9" y="0.5" dy="0.32em">0</text></g><g class="tick" opacity="1" transform="translate(0,365.625)"><line stroke="#000" x2="-6" y1="0.5" y2="0.5"></line><text fill="#000" x="-9" y="0.5" dy="0.32em">500</text></g><g class="tick" opacity="1" transform="translate(0,288.75)"><line stroke="#000" x2="-6" y1="0.5" y2="0.5"></line><text fill="#000" x="-9" y="0.5" dy="0.32em">1,000</text></g><g class="tick" opacity="1" transform="translate(0,211.875)"><line stroke="#000" x2="-6" y1="0.5" y2="0.5"></line><text fill="#000" x="-9" y="0.5" dy="0.32em">1,500</text></g><g class="tick" opacity="1" transform="translate(0,135)"><line stroke="#000" x2="-6" y1="0.5" y2="0.5"></line><text fill="#000" x="-9" y="0.5" dy="0.32em">2,000</text></g><g class="tick" opacity="1" transform="translate(0,58.125)"><line stroke="#000" x2="-6" y1="0.5" y2="0.5"></line><text fill="#000" x="-9" y="0.5" dy="0.32em">2,500</text></g></g></svg>
+</html>
